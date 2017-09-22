@@ -72,54 +72,66 @@ public class CoNLLNerReader extends AnnotationReader<TextAnnotation> {
      * @param outpath
      * @throws IOException
      */
-    public static void TaToConll(List<TextAnnotation> tas, String outpath) throws IOException {
+    public static void WriteOutTaToConll(List<TextAnnotation> tas, String outpath ) throws IOException {
+        WriteOutTaToConll(tas, outpath, ViewNames.NER_CONLL);
+    }
 
+
+    public static void WriteOutTaToConll(List<TextAnnotation> tas, String outpath, String viewName ) throws IOException {
         for (TextAnnotation ta : tas) {
-            List<String> talines = new ArrayList<>();
+            List<String> taLines = TaToConll(ta, viewName);
 
-            View sentview = ta.getView(ViewNames.SENTENCE);
-            View nerview = ta.getView(ViewNames.NER_CONLL);
-            for (int i = 0; i < ta.getTokens().length; i++) {
-
-                // Default "outside" label in NER_CONLL
-                String label = "O";
-
-                List<Constituent> constituents = nerview.getConstituentsCoveringToken(i);
-
-                // should be just one constituent
-                if (constituents.size() > 0) {
-                    Constituent c = constituents.get(0);
-                    if (c.getStartSpan() == i) {
-                        label = "B-" + c.getLabel();
-                    } else {
-                        label = "I-" + c.getLabel();
-                    }
-
-                    if (constituents.size() > 1) {
-                        logger.error("More than one label -- selecting the first.");
-                        logger.error("Constituents: " + constituents);
-                    }
-                }
-                talines.add(conllline(label, i, ta.getToken(i)));
-                List<Constituent> sents = sentview.getConstituentsCoveringToken(i);
-                if (sents.size() > 0) {
-                    Constituent sent = sents.get(0);
-
-                    int end = sent.getEndSpan();
-                    if (i == end - 1) {
-                        talines.add("");
-                    }
-
-                    if (sents.size() > 1) {
-                        logger.error("More than one sentence constituent for this token -- selecting the first.");
-                        logger.error("Sentences: " + sents);
-                    }
-                }
-            }
-
-            FileUtils.writeLines(Paths.get(outpath, ta.getId()).toFile(), talines);
+            FileUtils.writeLines(Paths.get(outpath, ta.getId()).toFile(), taLines);
         }
 
+    }
+
+    public static List<String> TaToConll(TextAnnotation ta, String nerViewName) throws IOException {
+
+        List<String> taLines = new ArrayList<>();
+
+        View sentview = ta.getView(ViewNames.SENTENCE);
+        View nerview = ta.getView(nerViewName);
+
+        for (int i = 0; i < ta.getTokens().length; i++) {
+
+            // Default "outside" label in NER_CONLL
+            String label = "O";
+
+            List<Constituent> constituents = nerview.getConstituentsCoveringToken(i);
+
+            // should be just one constituent
+            if (constituents.size() > 0) {
+                Constituent c = constituents.get(0);
+                if (c.getStartSpan() == i) {
+                    label = "B-" + c.getLabel();
+                } else {
+                    label = "I-" + c.getLabel();
+                }
+
+                if (constituents.size() > 1) {
+                    logger.error("More than one label -- selecting the first.");
+                    logger.error("Constituents: " + constituents);
+                }
+            }
+            taLines.add(conllline(label, i, ta.getToken(i)));
+            List<Constituent> sents = sentview.getConstituentsCoveringToken(i);
+            if (sents.size() > 0) {
+                Constituent sent = sents.get(0);
+
+                int end = sent.getEndSpan();
+                if (i == end - 1) {
+                    taLines.add("");
+                }
+
+                if (sents.size() > 1) {
+                    logger.error("More than one sentence constituent for this token -- selecting the first.");
+                    logger.error("Sentences: " + sents);
+                }
+            }
+        }
+
+        return taLines;
     }
 
     /**

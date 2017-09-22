@@ -72,12 +72,20 @@ public class BrownClusters {
      * @param isLowercaseBrownClusters
      */
     public static void init(Vector<String> pathsToClusterFiles, Vector<Integer> thresholds,
-            Vector<Boolean> isLowercaseBrownClusters, boolean useLocalBrownCluster) {
+            Vector<Boolean> isLowercaseBrownClusters, String localPath) throws FileNotFoundException, InvalidPortException, InvalidEndpointException, DatastoreException {
 
         try {
-        Datastore dsNoCredentials = new Datastore(new ResourceConfigurator().getDefaultConfig());
-        File bcDirectory = dsNoCredentials.getDirectory("org.cogcomp.brown-clusters", "brown-clusters", 1.5, false);
+            File gazDirectory = null;
 
+            if ("1" == localPath) {
+                Datastore dsNoCredentials = new Datastore(new ResourceConfigurator().getDefaultConfig());
+                gazDirectory = dsNoCredentials.getDirectory("org.cogcomp.brown-clusters", "brown-clusters", 1.5, false);
+                logger.warn("Reading brown clusters from datastore: {}", localPath);
+            }
+            else {
+                gazDirectory = new File(localPath);
+                logger.warn("Reading brown clusters from local path: {}", localPath);
+            }
         synchronized (INIT_SYNC) {
             brownclusters = new BrownClusters();
             brownclusters.isLowercaseBrownClustersByResource =
@@ -88,12 +96,7 @@ public class BrownClusters {
                 THashMap<String, String> h = new THashMap<>();
                 // We used to access the files as resources. Now we are accessing them programmatically.
                 // InFile in = new InFile(ResourceUtilities.loadResource(pathsToClusterFiles.elementAt(i)));
-                // Here we check if local resource is specified.
-                String bcFilePath = bcDirectory.getPath() + File.separator + pathsToClusterFiles.elementAt(i);
-                if (useLocalBrownCluster){
-                    bcFilePath = pathsToClusterFiles.elementAt(i);
-                }
-                InputStream is = new FileInputStream(bcFilePath);
+                InputStream is = new FileInputStream(gazDirectory.getPath() + File.separator + pathsToClusterFiles.elementAt(i));
                 InFile in = new InFile(is);
                 String line = in.readLine();
                 int wordsAdded = 0;
@@ -121,6 +124,7 @@ public class BrownClusters {
         }
         } catch (InvalidPortException | InvalidEndpointException | DatastoreException | FileNotFoundException e) {
             e.printStackTrace();
+            throw e;
         }
     }
 
@@ -154,15 +158,6 @@ public class BrownClusters {
         String[] res = new String[v.size()];
         res = v.toArray(res);
         return res;
-    }
-
-    final public String getPrefixesCombined(String word){
-        String[] cl = getPrefixes(word);
-        String ret = "";
-        for (String s : cl){
-            ret += s + ",";
-        }
-        return ret;
     }
 
     private static void printArr(String[] arr) {
@@ -225,4 +220,5 @@ public class BrownClusters {
          * printArr(getPrefixes(new NEWord(new Word("guidance"),null,null)));
          */
     }
+
 }
