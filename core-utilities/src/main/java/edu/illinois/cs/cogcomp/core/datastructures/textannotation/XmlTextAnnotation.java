@@ -13,6 +13,7 @@ import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 import edu.illinois.cs.cogcomp.core.utilities.StringTransformation;
 import edu.illinois.cs.cogcomp.core.utilities.XmlDocumentProcessor;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +29,7 @@ import java.util.Set;
  *
  * @author mssammon
  */
-public class XmlTextAnnotation {
+public class XmlTextAnnotation implements Serializable{
 
     private final StringTransformation xmlSt;
     private final TextAnnotation textAnnotation;

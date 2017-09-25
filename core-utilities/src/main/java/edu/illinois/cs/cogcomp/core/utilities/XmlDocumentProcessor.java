@@ -10,6 +10,7 @@ package edu.illinois.cs.cogcomp.core.utilities;
 import edu.illinois.cs.cogcomp.core.datastructures.IntPair;
 import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -30,8 +31,6 @@ import static edu.illinois.cs.cogcomp.core.utilities.TextCleanerStringTransforma
  */
 
 public class XmlDocumentProcessor {
-
-
 
     /**
      * tag to indicate that the associated information denotes a span in source xml with the associated label.
@@ -377,7 +376,7 @@ public class XmlDocumentProcessor {
     /**
      * a structure to store span information: label, offsets, attributes (including value offsets)
      */
-    public class SpanInfo {
+    public class SpanInfo implements Serializable {
 
         public final String label;
         public final IntPair spanOffsets;
@@ -389,6 +388,7 @@ public class XmlDocumentProcessor {
             this.attributes = attributes;
         }
     }
+
 
 
 }
