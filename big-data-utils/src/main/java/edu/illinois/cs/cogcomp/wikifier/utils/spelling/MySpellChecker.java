@@ -55,7 +55,7 @@
 //		System.out.println("Missed");
 //		for(String m:missed)
 //			System.out.println(m);
-//		sc.close();
+//		sc.closeCache();
 //	}
 //	
 //	public String[] query(String q) throws IOException
@@ -66,9 +66,9 @@
 //		return suggestions;
 //	}
 //	
-//	public void close() throws IOException
+//	public void closeCache() throws IOException
 //	{
-//		spellChecker.close();
+//		spellChecker.closeCache();
 //	}
 //	
 //	public MySpellChecker(String dictPath,String spellIndexPath, boolean createNewIndex) throws IOException
@@ -113,7 +113,7 @@
 //			if (c++ % 100 == 0)
 //				System.out.println("Done " + c);
 //		}
-//		pw.close();
+//		pw.closeCache();
 //		System.out.println("Finished " + c);
 //
 //	}

@@ -66,9 +66,9 @@
 //	}
 //
 //	@Override
-//	public void close() throws IOException
+//	public void closeCache() throws IOException
 //	{
-//		ir.close();
+//		ir.closeCache();
 //	}
 //	
 //	public static void main(String[] args) throws IOException
@@ -92,6 +92,6 @@
 ////		sc.query("Sri Lanke");
 ////		sc.query("Channing Tandum");
 //
-//		sc.close();
+//		sc.closeCache();
 //	}
 //}

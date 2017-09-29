@@ -9,7 +9,7 @@ package edu.illinois.cs.cogcomp.pipeline.handlers.clausie;
 
 import edu.illinois.cs.cogcomp.annotation.Annotator;
 import edu.illinois.cs.cogcomp.annotation.AnnotatorException;
-import edu.illinois.cs.cogcomp.annotation.BasicAnnotatorService;
+import edu.illinois.cs.cogcomp.annotation.CachingAnnotatorService;
 import edu.illinois.cs.cogcomp.annotation.TextAnnotationBuilder;
 import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
 import edu.illinois.cs.cogcomp.nlp.tokenizer.StatefulTokenizer;
@@ -29,7 +29,7 @@ public class ClauseAnnotatorFactory {
      * @throws IOException
      * @throws AnnotatorException
      */
-    public static BasicAnnotatorService buildPipeline() throws IOException, AnnotatorException {
+    public static CachingAnnotatorService buildPipeline() throws IOException, AnnotatorException {
         ResourceManager emptyConfig = new ResourceManager(new Properties());
         return buildPipeline(emptyConfig);
     }
@@ -41,13 +41,13 @@ public class ClauseAnnotatorFactory {
      * @throws IOException
      * @throws AnnotatorException
      */
-    public static BasicAnnotatorService buildPipeline(ResourceManager rm) throws IOException,
+    public static CachingAnnotatorService buildPipeline(ResourceManager rm) throws IOException,
             AnnotatorException {
         TextAnnotationBuilder taBldr =
                 new TokenizerTextAnnotationBuilder(new StatefulTokenizer(false));
 
         Map<String, Annotator> annotators = buildAnnotators();
-        return new BasicAnnotatorService(taBldr, annotators, rm);
+        return new CachingAnnotatorService(taBldr, annotators, rm);
     }
 
     private static Map<String, Annotator> buildAnnotators() throws IOException {

@@ -9,12 +9,10 @@ package edu.illinois.cs.cogcomp.pipeline.main;
 
 import edu.illinois.cs.cogcomp.annotation.AnnotatorException;
 import edu.illinois.cs.cogcomp.annotation.AnnotatorServiceConfigurator;
-import edu.illinois.cs.cogcomp.annotation.BasicAnnotatorService;
+import edu.illinois.cs.cogcomp.annotation.CachingAnnotatorService;
 import edu.illinois.cs.cogcomp.core.datastructures.ViewNames;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.Constituent;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
-import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TreeView;
-import edu.illinois.cs.cogcomp.core.datastructures.textannotation.View;
 import edu.illinois.cs.cogcomp.core.io.IOUtils;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.core.utilities.configuration.Configurator;
@@ -35,7 +33,7 @@ import static org.junit.Assert.*;
  */
 public class CachingPipelineTest {
     private static final String TEST_CACHE_FILE = "test-annotation-cache";
-    private static BasicAnnotatorService processor;
+    private static CachingAnnotatorService processor;
 
     @BeforeClass
     public static void init() throws IOException, AnnotatorException {

@@ -79,7 +79,7 @@ public class TestTemporalChunker {
                 "This flu season started in early December, a month earlier than usual, and peaked by the end " +
                 "of year. Since then, flu reports have been dropping off throughout the country.\n" +
                 "\n" +
-                "\"We appear to be getting close to the end of flu season,\" Jhung said.";
+                "\"We appear to be getting closeCache to the end of flu season,\" Jhung said.";
         TextAnnotationBuilder tab = new TokenizerTextAnnotationBuilder(new StatefulTokenizer());
         TextAnnotation ta = tab.createTextAnnotation("corpus", "id", text);
         POSAnnotator annotator = new POSAnnotator();

@@ -28,7 +28,7 @@ public class LlmSimTest {
 		Metric llm = new LLMStringSim(config);
 		String s1 = "please turn on the light";
 		String s2 = "please turn off the TV";
-		String s3 = "please close the door";
+		String s3 = "please closeCache the door";
 		double score = llm.compare(s1, s2).score;
 		double score2 = llm.compare(s1, s3).score;
 		assert (score > score2);

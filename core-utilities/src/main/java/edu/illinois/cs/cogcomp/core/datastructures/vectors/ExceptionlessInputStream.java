@@ -23,11 +23,9 @@ import java.util.zip.ZipInputStream;
  * @author Nick Rizzolo
  **/
 public class ExceptionlessInputStream extends FilterInputStream {
-    private static Logger logger = LoggerFactory.getLogger(ExceptionlessInputStream.class);
-
     /** The entry inside any compressed file has this name. */
     public static final String zipEntryName = "LBJFile";
-
+    private static Logger logger = LoggerFactory.getLogger(ExceptionlessInputStream.class);
     /** This buffer is used internally by {@link #readUTF(int)}. */
     private byte[] buffer = null;
     /** This buffer is used internally by {@link #readUTF(int)}. */
@@ -35,6 +33,16 @@ public class ExceptionlessInputStream extends FilterInputStream {
     /** The underlying data input stream. */
     private DataInputStream dis;
 
+
+    /**
+     * Creates a new data input stream to read data from the specified underlying input stream.
+     *
+     * @param in The underlying input stream.
+     **/
+    public ExceptionlessInputStream(InputStream in) {
+        super(new DataInputStream(in));
+        dis = (DataInputStream) this.in;
+    }
 
     /**
      * Opens a buffered (and uncompressed) stream for reading from the specified file.
@@ -57,7 +65,6 @@ public class ExceptionlessInputStream extends FilterInputStream {
 
         return eis;
     }
-
 
     /**
      * Opens a compressed stream for reading from the specified file.
@@ -82,7 +89,6 @@ public class ExceptionlessInputStream extends FilterInputStream {
         return eis;
     }
 
-
     /**
      * Opens a buffered (and uncompressed) stream for reading from the specified location.
      *
@@ -102,7 +108,6 @@ public class ExceptionlessInputStream extends FilterInputStream {
 
         return eis;
     }
-
 
     /**
      * Opens a compressed stream for reading from the specified location.
@@ -129,20 +134,8 @@ public class ExceptionlessInputStream extends FilterInputStream {
         return eis;
     }
 
-
     /**
-     * Creates a new data input stream to read data from the specified underlying input stream.
-     *
-     * @param in The underlying input stream.
-     **/
-    public ExceptionlessInputStream(InputStream in) {
-        super(new DataInputStream(in));
-        dis = (DataInputStream) this.in;
-    }
-
-
-    /**
-     * Whenever an exception is caught, this method attempts to close the stream and exit the
+     * Whenever an exception is caught, this method attempts to closeCache the stream and exit the
      * program.
      *
      * @param e The thrown exception.
@@ -162,7 +155,7 @@ public class ExceptionlessInputStream extends FilterInputStream {
         try {
             dis.close();
         } catch (Exception e) {
-            System.err.println("Can't close input stream:");
+            System.err.println("Can't closeCache input stream:");
             e.printStackTrace();
             System.exit(1);
         }

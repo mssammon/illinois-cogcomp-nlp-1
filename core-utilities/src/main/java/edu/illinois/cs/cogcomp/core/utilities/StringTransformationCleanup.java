@@ -44,7 +44,7 @@ public class StringTransformationCleanup {
                 Pair<Boolean, Integer> replacement =
                         normalizeCharacter(startStr, encoding, offset);
 
-                Character replacedChar = (char) replacement.getSecond().intValue();
+                Character replacedChar = new Character((char) replacement.getSecond().intValue());
 
                 if (null != replacedChar) {
 

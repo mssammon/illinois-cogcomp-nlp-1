@@ -20,6 +20,8 @@ import java.sql.SQLException;
 
 
 public class TextAnnotationDBHandler implements TextAnnotationCache {
+    private static final Logger logger = LoggerFactory.getLogger(TextAnnotationDBHandler.class);
+
     private final String dbFile;
     private final String[] datasetNames;
     private Logger log = LoggerFactory.getLogger(TextAnnotationDBHandler.class);
@@ -32,7 +34,7 @@ public class TextAnnotationDBHandler implements TextAnnotationCache {
 
         log.info("Sentence cache {}found", create ? "not " : "");
 
-        DBHelper.initializeConnection(dbFile);
+        openCache();
         log.info("Initialized connection to {}", dbFile);
 
         if (create) {
@@ -280,5 +282,27 @@ public class TextAnnotationDBHandler implements TextAnnotationCache {
     public TextAnnotation getTextAnnotation(TextAnnotation ta) {
         log.error("Not implemented." );
         return null;
+    }
+
+    @Override
+    public void closeCache() {
+        DBHelper.closeConnection(dbFile);
+    }
+
+    @Override
+    public void openCache() {
+        DBHelper.initializeConnection(dbFile);
+    }
+
+    @Override
+    public boolean isCacheOpen() {
+        Connection c = DBHelper.getConnection(dbFile);
+        try {
+            return !c.isClosed();
+        } catch (SQLException e) {
+            logger.error("error checking DB connection: {}", e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 }

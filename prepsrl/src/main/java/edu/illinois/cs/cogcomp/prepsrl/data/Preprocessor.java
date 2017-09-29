@@ -46,7 +46,7 @@ public class Preprocessor {
             annotators.put(ViewNames.LEMMA, new IllinoisLemmatizer());
             annotators.put(ViewNames.SHALLOW_PARSE, new ChunkerAnnotator());
             annotators.put(ViewNames.DEPENDENCY, new DepAnnotator());
-            annotator = new BasicAnnotatorService(taBldr, annotators, fullRm);
+            annotator = new CachingAnnotatorService(taBldr, annotators, fullRm);
         } catch (Exception e) {
             logger.error("Unable to create preprocessor. \n{}", e.getMessage());
         }

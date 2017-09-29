@@ -8,15 +8,11 @@
 package edu.illinois.cs.cogcomp.core.datastructures.textannotation;
 
 import edu.illinois.cs.cogcomp.annotation.XmlTextAnnotationMaker;
-import edu.illinois.cs.cogcomp.core.datastructures.IntPair;
-import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 import edu.illinois.cs.cogcomp.core.utilities.StringTransformation;
-import edu.illinois.cs.cogcomp.core.utilities.XmlDocumentProcessor;
+import edu.illinois.cs.cogcomp.core.utilities.SpanInfo;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Represent a document that contains xml markup. Another class -- {@link XmlTextAnnotationMaker}, extracts a subset
@@ -33,9 +29,9 @@ public class XmlTextAnnotation implements Serializable{
 
     private final StringTransformation xmlSt;
     private final TextAnnotation textAnnotation;
-    private final List<XmlDocumentProcessor.SpanInfo> xmlMarkup;
+    private final List<SpanInfo> xmlMarkup;
 
-    public XmlTextAnnotation(StringTransformation xmlSt, TextAnnotation ta, List<XmlDocumentProcessor.SpanInfo> xmlMarkup) {
+    public XmlTextAnnotation(StringTransformation xmlSt, TextAnnotation ta, List<SpanInfo> xmlMarkup) {
         this.xmlSt = xmlSt;
         this.textAnnotation = ta;
         this.xmlMarkup = xmlMarkup;
@@ -49,7 +45,7 @@ public class XmlTextAnnotation implements Serializable{
         return textAnnotation;
     }
 
-    public List<XmlDocumentProcessor.SpanInfo> getXmlMarkup() {
+    public List<SpanInfo> getXmlMarkup() {
         return xmlMarkup;
     }
 

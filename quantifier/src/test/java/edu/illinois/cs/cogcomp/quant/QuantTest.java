@@ -353,7 +353,7 @@ public class QuantTest {
         assertTrue(isEqual("[= 100.0]", normalizer.parse("100 dlrs", "NUMBER").toString()));
         assertTrue(isEqual("[> 100.0]", normalizer.parse("at least 100 dollars", "NUMBER")
                 .toString()));
-        assertTrue(isEqual("[~ 100.0]", normalizer.parse("close to 100 dollars", "NUMBER")
+        assertTrue(isEqual("[~ 100.0]", normalizer.parse("closeCache to 100 dollars", "NUMBER")
                 .toString()));
         assertTrue(isEqual("[~ 100.0]", normalizer.parse("nearly 100 dollars", "NUMBER").toString()));
         assertTrue(isEqual("[~ 16.0]", normalizer.parse("approx $16 a barrel", "NUMBER").toString()));

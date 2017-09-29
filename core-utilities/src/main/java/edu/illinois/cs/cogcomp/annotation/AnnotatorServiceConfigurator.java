@@ -12,7 +12,7 @@ import edu.illinois.cs.cogcomp.core.utilities.configuration.Property;
 import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
 
 /**
- * The default {@link Configurator} for {@link BasicAnnotatorService}
+ * The default {@link Configurator} for {@link CachingAnnotatorService}
  *
  * @author Mark Sammons
  * @author Christos Christodoulopoulos

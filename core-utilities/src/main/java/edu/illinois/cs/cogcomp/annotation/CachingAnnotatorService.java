@@ -43,9 +43,9 @@ import java.util.Set;
  *
  * Created by mssammon on 4/13/15.
  */
-public class BasicAnnotatorService implements AnnotatorService {
+public class CachingAnnotatorService implements AnnotatorService {
 
-    private static Logger logger = LoggerFactory.getLogger(BasicAnnotatorService.class);
+    private static Logger logger = LoggerFactory.getLogger(CachingAnnotatorService.class);
 
     protected TextAnnotationCache annotationCache = null;
     protected boolean disableCache = false;
@@ -78,8 +78,8 @@ public class BasicAnnotatorService implements AnnotatorService {
      * @param rm A {@link ResourceManager} containing cache configuration options.
      * @throws edu.illinois.cs.cogcomp.annotation.AnnotatorException
      */
-    public BasicAnnotatorService(TextAnnotationBuilder textAnnotationBuilder,
-            Map<String, Annotator> viewProviders, ResourceManager rm) throws AnnotatorException {
+    public CachingAnnotatorService(TextAnnotationBuilder textAnnotationBuilder,
+                                   Map<String, Annotator> viewProviders, ResourceManager rm) throws AnnotatorException {
         this(textAnnotationBuilder, viewProviders, rm
                 .getString(AnnotatorServiceConfigurator.CACHE_DIR.key), rm
                 .getBoolean(AnnotatorServiceConfigurator.THROW_EXCEPTION_IF_NOT_CACHED.key), rm
@@ -94,8 +94,8 @@ public class BasicAnnotatorService implements AnnotatorService {
      * @param viewProviders annotators that will populate views in new TextAnnotation objects
      * @throws AnnotatorException
      */
-    public BasicAnnotatorService(TextAnnotationBuilder textAnnotationBuilder,
-            Map<String, Annotator> viewProviders) throws AnnotatorException {
+    public CachingAnnotatorService(TextAnnotationBuilder textAnnotationBuilder,
+                                   Map<String, Annotator> viewProviders) throws AnnotatorException {
         this(textAnnotationBuilder, viewProviders, (new AnnotatorServiceConfigurator())
                 .getDefaultConfig());
 
@@ -112,10 +112,10 @@ public class BasicAnnotatorService implements AnnotatorService {
      * @param throwExceptionIfNotCached if 'true', throw an exception if no cached value is found.
      * @throws AnnotatorException
      */
-    public BasicAnnotatorService(TextAnnotationBuilder textAnnotationBuilder,
-            Map<String, Annotator> viewProviders, String cacheFile,
-            boolean throwExceptionIfNotCached, boolean disableCache,
-            boolean forceUpdate) throws AnnotatorException {
+    public CachingAnnotatorService(TextAnnotationBuilder textAnnotationBuilder,
+                                   Map<String, Annotator> viewProviders, String cacheFile,
+                                   boolean throwExceptionIfNotCached, boolean disableCache,
+                                   boolean forceUpdate) throws AnnotatorException {
         this.textAnnotationBuilder = textAnnotationBuilder;
         this.disableCache = disableCache;
         this.forceUpdate = forceUpdate;
@@ -414,5 +414,24 @@ public class BasicAnnotatorService implements AnnotatorService {
             }
         }
         return ta;
+    }
+
+
+    /**
+     * if the cache is a lockable resource, closeCache the cache to free it for use elsewhere. Part of cleanup when you
+     * finish with a CachingAnnotatorService.
+     */
+    public void closeCache() throws Exception {
+        if (annotationCache.isCacheOpen())
+            annotationCache.closeCache();
+    }
+
+
+    /**
+     * if the cache has been closed by a client, re-open it.
+     */
+    public void openCache() throws Exception{
+        if (!annotationCache.isCacheOpen())
+            annotationCache.openCache();
     }
 }

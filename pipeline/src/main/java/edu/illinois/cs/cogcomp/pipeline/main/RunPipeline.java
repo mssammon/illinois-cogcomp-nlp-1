@@ -8,7 +8,7 @@
 package edu.illinois.cs.cogcomp.pipeline.main;
 
 import edu.illinois.cs.cogcomp.annotation.AnnotatorException;
-import edu.illinois.cs.cogcomp.annotation.BasicAnnotatorService;
+import edu.illinois.cs.cogcomp.annotation.CachingAnnotatorService;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.core.io.IOUtils;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
@@ -34,7 +34,7 @@ public class RunPipeline {
     private static final String NAME = RunPipeline.class.getCanonicalName();
     private Logger logger = LoggerFactory.getLogger(RunPipeline.class);
 
-    private BasicAnnotatorService pipeline;
+    private CachingAnnotatorService pipeline;
 
     /**
      * config may contain values that override defaults.

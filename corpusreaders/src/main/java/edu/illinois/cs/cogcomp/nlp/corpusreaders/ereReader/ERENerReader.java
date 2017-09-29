@@ -15,6 +15,7 @@ import edu.illinois.cs.cogcomp.core.datastructures.ViewNames;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.*;
 import edu.illinois.cs.cogcomp.core.utilities.StringTransformation;
 import edu.illinois.cs.cogcomp.core.utilities.XmlDocumentProcessor;
+import edu.illinois.cs.cogcomp.core.utilities.SpanInfo;
 import edu.illinois.cs.cogcomp.nlp.corpusreaders.aceReader.SimpleXMLParser;
 import edu.illinois.cs.cogcomp.nlp.corpusreaders.aceReader.XMLException;
 import edu.illinois.cs.cogcomp.nlp.tokenizer.StatefulTokenizer;
@@ -78,7 +79,7 @@ public class ERENerReader extends EREDocumentReader {
     /**
      * tracks anything in source xml markup that could be annotated
      */
-    private Map<IntPair, XmlDocumentProcessor.SpanInfo> offsetToSpanInfo;
+    private Map<IntPair, SpanInfo> offsetToSpanInfo;
     private int numEntitiesInSource;
     private int numEntitiesGenerated;
     private int numXmlMarkupEntitiesGenerated;
@@ -533,7 +534,7 @@ public class ERENerReader extends EREDocumentReader {
 
 //        boolean isFound = spanInfo.containsKey(origOffsets);
 
-        XmlDocumentProcessor.SpanInfo mentionInfo = findAndUpdateMentionInfo(origOffsets, nounType, label, eId, mId, specificity);
+        SpanInfo mentionInfo = findAndUpdateMentionInfo(origOffsets, nounType, label, eId, mId, specificity);
 
         boolean isFound = true;
 
@@ -557,10 +558,10 @@ public class ERENerReader extends EREDocumentReader {
      * mention length should be the same, but in at least one file many offsets are shifted by +1
      * allow also -1 shift
      */
-    private XmlDocumentProcessor.SpanInfo findAndUpdateMentionInfo(IntPair origOffsets, String nounType, String label,
+    private SpanInfo findAndUpdateMentionInfo(IntPair origOffsets, String nounType, String label,
                                                                    String eId, String mId, String specificity) {
 
-        XmlDocumentProcessor.SpanInfo mentionInfo = offsetToSpanInfo.get(origOffsets);
+        SpanInfo mentionInfo = offsetToSpanInfo.get(origOffsets);
 
         if (null == mentionInfo)
             mentionInfo = offsetToSpanInfo.get(new IntPair(origOffsets.getFirst() - 1, origOffsets.getSecond() - 1));

@@ -27,17 +27,14 @@ import java.util.List;
  * Subclasses need to implement specific methods for candidate generation and input format reading.
  */
 abstract public class DataReader implements Parser {
-    protected static Logger logger = LoggerFactory.getLogger(DataReader.class);
-
     public static final String CANDIDATE = "candidate";
-
+    protected static Logger logger = LoggerFactory.getLogger(DataReader.class);
+    protected final String file;
+    private final TextAnnotationMapDBHandler dbHandler;
     protected IResetableIterator<TextAnnotation> dataset;
+    protected String viewName, corpusName;
     private List<Constituent> candidates;
     private int currentCandidate, currentTextAnnotation;
-    protected String viewName, corpusName;
-    protected final String file;
-
-    private final TextAnnotationMapDBHandler dbHandler;
 
     public DataReader(String file, String corpusName, String viewName) {
         this.file = file;
@@ -141,6 +138,6 @@ abstract public class DataReader implements Parser {
 
     @Override
     public void close() {
-        dbHandler.close();
+        dbHandler.closeCache();
     }
 }

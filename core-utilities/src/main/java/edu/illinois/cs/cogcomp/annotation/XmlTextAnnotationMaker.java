@@ -7,19 +7,16 @@
  */
 package edu.illinois.cs.cogcomp.annotation;
 
-import edu.illinois.cs.cogcomp.core.datastructures.IntPair;
 import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.XmlTextAnnotation;
 import edu.illinois.cs.cogcomp.core.utilities.StringTransformation;
-import edu.illinois.cs.cogcomp.core.utilities.TextCleanerStringTransformation;
 import edu.illinois.cs.cogcomp.core.utilities.XmlDocumentProcessor;
+import edu.illinois.cs.cogcomp.core.utilities.SpanInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Instantiates a XmlTextAnnotation object from xml text. The xml is parsed into body text (which is further cleaned
@@ -71,7 +68,7 @@ public class XmlTextAnnotationMaker {
      */
     public XmlTextAnnotation createTextAnnotation(String xmlText, String corpusId, String docId)  {
     	logger.debug("processing text from document {}", docId);
-        Pair<StringTransformation, List<XmlDocumentProcessor.SpanInfo>> cleanResults =
+        Pair<StringTransformation, List<SpanInfo>> cleanResults =
                 xmlProcessor.processXml(xmlText);
 
         TextAnnotation ta = taBuilder.createTextAnnotation(corpusId, docId,

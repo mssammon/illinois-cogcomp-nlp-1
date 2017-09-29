@@ -74,12 +74,12 @@ cuba
         boolean throwExceptionOnXmlTagMiss = true;
         XmlDocumentProcessor proc = new XmlDocumentProcessor(deletableSpanTags, tagsWithAtts, tagsToIgnore, throwExceptionOnXmlTagMiss);
 
-        Pair<StringTransformation, List<XmlDocumentProcessor.SpanInfo>> nt = proc.processXml(ORIG_TEXT);
+        Pair<StringTransformation, List<SpanInfo>> nt = proc.processXml(ORIG_TEXT);
 
         // check that we retained the right attributes, cleaned up the text, generated a sensible cleaned text, and can
         // recover the offsets of strings in the original text.
         StringTransformation st = nt.getFirst();
-        List<XmlDocumentProcessor.SpanInfo> retainedTagInfo = nt.getSecond();
+        List<SpanInfo> retainedTagInfo = nt.getSecond();
 
         String cleanText = st.getTransformedText();
 
@@ -87,9 +87,9 @@ cuba
         assertEquals(CLEAN_TEXT, cleanText);
 
 //        Map<IntPair, String> attrVals = XmlDocumentProcessor.compileAttributeValues(retainedTagInfo);
-        Map<IntPair, XmlDocumentProcessor.SpanInfo> offsetToSpans = XmlDocumentProcessor.compileOffsetSpanMapping(retainedTagInfo);
+        Map<IntPair, SpanInfo> offsetToSpans = XmlDocumentProcessor.compileOffsetSpanMapping(retainedTagInfo);
         assertTrue(offsetToSpans.containsKey(POST_OFFSETS));
-        XmlDocumentProcessor.SpanInfo spanInfo = offsetToSpans.get(POST_OFFSETS);
+        SpanInfo spanInfo = offsetToSpans.get(POST_OFFSETS);
         assertTrue(spanInfo.attributes.containsKey(AUTHOR));
         assertEquals(NAME, spanInfo.attributes.get(AUTHOR).getFirst());
         assertEquals(AUTHOR_OFFSETS, spanInfo.attributes.get(AUTHOR).getSecond());

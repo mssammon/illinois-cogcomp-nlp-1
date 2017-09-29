@@ -10,6 +10,8 @@ package edu.illinois.cs.cogcomp.core.io.caches;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.IResetableIterator;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 
+import java.sql.SQLException;
+
 /**
  * An interface for caching {@link TextAnnotation}s. Can be implemented with different technologies:
  * DB's, simple file storage, MapDB, etc.
@@ -28,4 +30,10 @@ public interface TextAnnotationCache {
     void removeTextAnnotation(TextAnnotation ta);
 
     TextAnnotation getTextAnnotation(TextAnnotation ta);
+
+    void closeCache();
+
+    void openCache();
+
+    boolean isCacheOpen() throws SQLException;
 }

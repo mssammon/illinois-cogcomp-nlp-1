@@ -42,37 +42,130 @@ import java.util.*;
  * @author Christos Christodoulopoulos
  */
 public class PrepSRLDataReader extends DataReader {
-    private static Preprocessor preprocessor;
-    private static Logger log = LoggerFactory.getLogger(PrepSRLDataReader.class);
-
     private static final String semevalTrainDataDirectory = "train/xml";
     private static final String semevalTestDataDirectory = "test/xml";
     private static final String semevalKeyDirectory = "Answers";
-
-    private int currentNodeId;
-    private Hashtable<String, String> keys;
-
-    private static Map<String, String> senseToRole;
-    private static Map<String, Set<String>> prepositionToValidRoles;
-
     private static final Set<String> prepositions = new HashSet<>(Arrays.asList("about", "above",
             "across", "after", "against", "along", "among", "around", "as", "at", "before",
             "behind", "beneath", "beside", "between", "by", "down", "during", "for", "from", "in",
             "inside", "into", "like", "of", "off", "on", "onto", "over", "round", "through", "to",
             "towards", "with"));
-
     private static final Set<String> mwPrepositionsList = new HashSet<>(Arrays.asList(
             "according to", "ahead of", "as of", "as per", "as regards", "aside from", "at least",
-            "because of", "close to", "due to", "except for", "far from", "in to", "inside of",
+            "because of", "closeCache to", "due to", "except for", "far from", "in to", "inside of",
             "instead of", "near to", "next to", "on to ", "out from", "out of", "outside of",
             "owing to", "prior to", "pursuant to", "regardless of", "subsequent to", "thanks to",
             "that of", "as far as", "as well as", "by means of", "in accordance with",
             "in addition to", "in case of", "in front of", "in lieu of", "in place of",
             "in point of", "in spite of", "on account of", "on behalf of", "with regard to",
             "with respect to"));
+    private static Preprocessor preprocessor;
+    private static Logger log = LoggerFactory.getLogger(PrepSRLDataReader.class);
+    private static Map<String, String> senseToRole;
+    private static Map<String, Set<String>> prepositionToValidRoles;
+    private int currentNodeId;
+    private Hashtable<String, String> keys;
 
     public PrepSRLDataReader(String dataDir, String corpusName) {
         super(dataDir, corpusName, ViewNames.SRL_PREP);
+    }
+
+    private static void lazyReadMaps() {
+        // Read the sense2role conversion
+        senseToRole = new HashMap<>();
+        prepositionToValidRoles = new HashMap<>();
+        boolean firstLine = true;
+        try {
+            for (String line : LineIO.readFromClasspath("sense2role.csv")) {
+                if (firstLine) {
+                    firstLine = false;
+                    continue;
+                }
+
+                line = line.trim();
+                if (line.length() == 0)
+                    continue;
+
+                if (line.matches("^,+$"))
+                    continue;
+                String[] parts = line.split(",");
+
+                String preposition = parts[0].trim();
+                String sense = preposition + ":" + parts[1].trim();
+                String role = parts[3].trim();
+
+                if (preposition.length() == 0)
+                    continue;
+
+                senseToRole.put(sense, role);
+
+                if (!prepositionToValidRoles.containsKey(preposition))
+                    prepositionToValidRoles.put(preposition, new HashSet<>());
+                prepositionToValidRoles.get(preposition).add(role);
+            }
+        } catch (Exception ex) {
+            System.err.println("Error reading the sense2role file" + ex);
+        }
+    }
+
+    public static boolean isPrep(TextAnnotation ta, int tokenId) {
+        String pos = WordHelpers.getPOS(ta, tokenId);
+        String word = WordHelpers.getWord(ta, tokenId);
+        String lowerCase = word.toLowerCase().trim();
+
+        boolean validPreposition = prepositions.contains(lowerCase);
+
+        boolean isPrepositionPOS = POSUtils.isPOSPreposition(pos);
+
+        // we need to consider the case of "to + verb"
+        boolean isToVP = false;
+        if (tokenId < ta.size() - 1) {
+            if (lowerCase.equals("to") && POSUtils.isPOSVerb(WordHelpers.getPOS(ta, tokenId + 1)))
+                isToVP = true;
+        }
+
+        return validPreposition && (isPrepositionPOS && !isToVP);
+    }
+
+    public static Constituent isBigramPrep(TextAnnotation ta, int tokenId, String viewName) {
+        String word = WordHelpers.getWord(ta, tokenId);
+        if (tokenId < ta.size() - 1) {
+            String nextWord = WordHelpers.getWord(ta, tokenId + 1);
+            if (mwPrepositionsList.contains(word + " " + nextWord))
+                return new Constituent("", viewName, ta, tokenId, tokenId + 2);
+        }
+        return null;
+    }
+
+    public static Constituent isTrigramPrep(TextAnnotation ta, int tokenId, String viewName) {
+        String word = WordHelpers.getWord(ta, tokenId);
+        if (tokenId < ta.size() - 2) {
+            String nextWord = WordHelpers.getWord(ta, tokenId + 1);
+            String nextNextWord = WordHelpers.getWord(ta, tokenId + 2);
+            if (mwPrepositionsList.contains(word + " " + nextWord + " " + nextNextWord))
+                return new Constituent("", viewName, ta, tokenId, tokenId + 3);
+        }
+        return null;
+    }
+
+    public static Set<String> getLegalRoles(Constituent predicate) {
+        if (prepositionToValidRoles == null)
+            lazyReadMaps();
+        Set<String> strings = new HashSet<>();
+        strings.add(DataReader.CANDIDATE);
+        if (prepositionToValidRoles.containsKey(predicate.getSurfaceForm().toLowerCase()))
+            strings.addAll(prepositionToValidRoles.get(predicate.getSurfaceForm().toLowerCase()));
+        return strings;
+    }
+
+    private static List<String> tokenize(String line) {
+        StringTokenizer tokenizer = new StringTokenizer(line);
+
+        List<String> tokens = new ArrayList<>();
+        while (tokenizer.hasMoreTokens())
+            tokens.add(tokenizer.nextToken());
+
+        return tokens;
     }
 
     @Override
@@ -177,44 +270,6 @@ public class PrepSRLDataReader extends DataReader {
         return consolidatedTAs;
     }
 
-    private static void lazyReadMaps() {
-        // Read the sense2role conversion
-        senseToRole = new HashMap<>();
-        prepositionToValidRoles = new HashMap<>();
-        boolean firstLine = true;
-        try {
-            for (String line : LineIO.readFromClasspath("sense2role.csv")) {
-                if (firstLine) {
-                    firstLine = false;
-                    continue;
-                }
-
-                line = line.trim();
-                if (line.length() == 0)
-                    continue;
-
-                if (line.matches("^,+$"))
-                    continue;
-                String[] parts = line.split(",");
-
-                String preposition = parts[0].trim();
-                String sense = preposition + ":" + parts[1].trim();
-                String role = parts[3].trim();
-
-                if (preposition.length() == 0)
-                    continue;
-
-                senseToRole.put(sense, role);
-
-                if (!prepositionToValidRoles.containsKey(preposition))
-                    prepositionToValidRoles.put(preposition, new HashSet<>());
-                prepositionToValidRoles.get(preposition).add(role);
-            }
-        } catch (Exception ex) {
-            System.err.println("Error reading the sense2role file" + ex);
-        }
-    }
-
     @Override
     public List<Constituent> candidateGenerator(TextAnnotation ta) {
         List<Constituent> candidates = new ArrayList<>();
@@ -223,56 +278,6 @@ public class PrepSRLDataReader extends DataReader {
         // and will be mistakenly considered as a CANDIDATE. To fix this, only add prepositions
         // from the gold annotations.
         return getFinalCandidates(ta.getView(viewName), candidates);
-    }
-
-    public static boolean isPrep(TextAnnotation ta, int tokenId) {
-        String pos = WordHelpers.getPOS(ta, tokenId);
-        String word = WordHelpers.getWord(ta, tokenId);
-        String lowerCase = word.toLowerCase().trim();
-
-        boolean validPreposition = prepositions.contains(lowerCase);
-
-        boolean isPrepositionPOS = POSUtils.isPOSPreposition(pos);
-
-        // we need to consider the case of "to + verb"
-        boolean isToVP = false;
-        if (tokenId < ta.size() - 1) {
-            if (lowerCase.equals("to") && POSUtils.isPOSVerb(WordHelpers.getPOS(ta, tokenId + 1)))
-                isToVP = true;
-        }
-
-        return validPreposition && (isPrepositionPOS && !isToVP);
-    }
-
-    public static Constituent isBigramPrep(TextAnnotation ta, int tokenId, String viewName) {
-        String word = WordHelpers.getWord(ta, tokenId);
-        if (tokenId < ta.size() - 1) {
-            String nextWord = WordHelpers.getWord(ta, tokenId + 1);
-            if (mwPrepositionsList.contains(word + " " + nextWord))
-                return new Constituent("", viewName, ta, tokenId, tokenId + 2);
-        }
-        return null;
-    }
-
-    public static Constituent isTrigramPrep(TextAnnotation ta, int tokenId, String viewName) {
-        String word = WordHelpers.getWord(ta, tokenId);
-        if (tokenId < ta.size() - 2) {
-            String nextWord = WordHelpers.getWord(ta, tokenId + 1);
-            String nextNextWord = WordHelpers.getWord(ta, tokenId + 2);
-            if (mwPrepositionsList.contains(word + " " + nextWord + " " + nextNextWord))
-                return new Constituent("", viewName, ta, tokenId, tokenId + 3);
-        }
-        return null;
-    }
-
-    public static Set<String> getLegalRoles(Constituent predicate) {
-        if (prepositionToValidRoles == null)
-            lazyReadMaps();
-        Set<String> strings = new HashSet<>();
-        strings.add(DataReader.CANDIDATE);
-        if (prepositionToValidRoles.containsKey(predicate.getSurfaceForm().toLowerCase()))
-            strings.addAll(prepositionToValidRoles.get(predicate.getSurfaceForm().toLowerCase()));
-        return strings;
     }
 
     private TextAnnotation makeNewTextAnnotation(Element item) {
@@ -338,16 +343,6 @@ public class PrepSRLDataReader extends DataReader {
         ta.addView(viewName, prepositionLabelView);
 
         return ta;
-    }
-
-    private static List<String> tokenize(String line) {
-        StringTokenizer tokenizer = new StringTokenizer(line);
-
-        List<String> tokens = new ArrayList<>();
-        while (tokenizer.hasMoreTokens())
-            tokens.add(tokenizer.nextToken());
-
-        return tokens;
     }
 
     private List<String> getFiles(String dataDir) {

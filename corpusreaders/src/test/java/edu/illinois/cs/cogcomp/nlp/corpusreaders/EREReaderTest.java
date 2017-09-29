@@ -12,6 +12,7 @@ import edu.illinois.cs.cogcomp.core.datastructures.ViewNames;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.*;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.core.utilities.SerializationHelper;
+import edu.illinois.cs.cogcomp.core.utilities.SpanInfo;
 import edu.illinois.cs.cogcomp.core.utilities.StringTransformation;
 import edu.illinois.cs.cogcomp.core.utilities.XmlDocumentProcessor;
 import edu.illinois.cs.cogcomp.nlp.corpusreaders.ereReader.EREDocumentReader;
@@ -113,8 +114,8 @@ public class EREReaderTest {
         StringTransformation xmlSt = outputXmlTa.getXmlSt();
         String origXml = xmlSt.getOrigText();
 
-        List<XmlDocumentProcessor.SpanInfo> markup = outputXmlTa.getXmlMarkup();
-        Map<IntPair, XmlDocumentProcessor.SpanInfo> markupInfo = XmlDocumentProcessor.compileOffsetSpanMapping(markup);
+        List<SpanInfo> markup = outputXmlTa.getXmlMarkup();
+        Map<IntPair, SpanInfo> markupInfo = XmlDocumentProcessor.compileOffsetSpanMapping(markup);
         Map<IntPair, Set<String>> markupAttributes = XmlDocumentProcessor.compileAttributeValues(markup);
 
         Set<String> dateTimeReported = markupAttributes.get(DATETIMEOFFSETS);
@@ -135,7 +136,7 @@ public class EREReaderTest {
          * other values recorded at same offsets are not required to be mapped to xml document char offsets.
          * Since this value is not retained in the cleaned text, there is NO CORRESPONDING CONSTITUENT.
          */
-        XmlDocumentProcessor.SpanInfo postSpan = markupInfo.get(POSTOFFSETS);
+        SpanInfo postSpan = markupInfo.get(POSTOFFSETS);
         String mid = postSpan.attributes.get(ENTITY_MENTION_ID).getFirst();
         assertEquals(MENTION_ID_VAL, mid);
 

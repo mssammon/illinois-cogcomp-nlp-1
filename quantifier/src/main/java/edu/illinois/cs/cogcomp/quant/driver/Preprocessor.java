@@ -32,13 +32,6 @@ class Preprocessor {
     private final ResourceManager rm;
     private AnnotatorService annotator;
 
-    private static Map<String, Annotator> buildAnnotators() throws IOException {
-        Map<String, Annotator> viewGenerators = new HashMap<>();
-        POSAnnotator pos = new POSAnnotator();
-        viewGenerators.put(pos.getViewName(), pos);
-        return viewGenerators;
-    }
-
     Preprocessor(ResourceManager rm) {
         Map<String, String> nonDefaultValues = new HashMap<>();
         nonDefaultValues.put(CuratorConfigurator.RESPECT_TOKENIZATION.key, Configurator.TRUE);
@@ -49,7 +42,7 @@ class Preprocessor {
         if (!rm.getBoolean(PreprocessorConfigurator.USE_CURATOR)) {
             try {
                 annotator =
-                        new BasicAnnotatorService(new TokenizerTextAnnotationBuilder(
+                        new CachingAnnotatorService(new TokenizerTextAnnotationBuilder(
                                 new StatefulTokenizer()), buildAnnotators(), this.rm);
             } catch (AnnotatorException | IOException e) {
                 e.printStackTrace();
@@ -61,6 +54,13 @@ class Preprocessor {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static Map<String, Annotator> buildAnnotators() throws IOException {
+        Map<String, Annotator> viewGenerators = new HashMap<>();
+        POSAnnotator pos = new POSAnnotator();
+        viewGenerators.put(pos.getViewName(), pos);
+        return viewGenerators;
     }
 
     /**

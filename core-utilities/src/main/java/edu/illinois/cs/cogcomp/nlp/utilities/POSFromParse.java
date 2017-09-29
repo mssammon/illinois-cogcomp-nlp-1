@@ -10,7 +10,7 @@ package edu.illinois.cs.cogcomp.nlp.utilities;
 import java.util.List;
 
 import edu.illinois.cs.cogcomp.annotation.Annotator;
-import edu.illinois.cs.cogcomp.annotation.BasicAnnotatorService;
+import edu.illinois.cs.cogcomp.annotation.CachingAnnotatorService;
 import edu.illinois.cs.cogcomp.core.datastructures.ViewNames;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.*;
 import edu.illinois.cs.cogcomp.core.datastructures.trees.Tree;
@@ -75,7 +75,7 @@ public class POSFromParse extends Annotator {
     }
 
     /**
-     * Can be used internally by {@link BasicAnnotatorService} to check for pre-requisites before
+     * Can be used internally by {@link CachingAnnotatorService} to check for pre-requisites before
      * calling any single (external) {@link Annotator}.
      *
      * @return The list of {@link edu.illinois.cs.cogcomp.core.datastructures.ViewNames} required by

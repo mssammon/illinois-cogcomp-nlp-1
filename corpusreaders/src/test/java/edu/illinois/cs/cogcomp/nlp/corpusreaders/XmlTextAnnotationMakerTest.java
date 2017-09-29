@@ -14,6 +14,7 @@ import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 import edu.illinois.cs.cogcomp.core.datastructures.ViewNames;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.*;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
+import edu.illinois.cs.cogcomp.core.utilities.SpanInfo;
 import edu.illinois.cs.cogcomp.core.utilities.StringTransformation;
 import edu.illinois.cs.cogcomp.core.utilities.XmlDocumentProcessor;
 import edu.illinois.cs.cogcomp.nlp.corpusreaders.ereReader.EREDocumentReader;
@@ -128,8 +129,8 @@ public class XmlTextAnnotationMakerTest {
             System.out.println("------\nsource: " + st.getOrigText().substring(sourceSpan.getFirst(), sourceSpan.getSecond()) +
                 ", (" + sourceSpan.getFirst() + ", " + sourceSpan.getSecond() + ")\n");
         }
-        List<XmlDocumentProcessor.SpanInfo> markup = output.getXmlMarkup();
-        Map<IntPair, XmlDocumentProcessor.SpanInfo> markupMap = XmlDocumentProcessor.compileOffsetSpanMapping(markup);
+        List<SpanInfo> markup = output.getXmlMarkup();
+        Map<IntPair, SpanInfo> markupMap = XmlDocumentProcessor.compileOffsetSpanMapping(markup);
         for (IntPair offsets : markupMap.keySet()) {
             System.out.print(offsets.getFirst() + "-" + offsets.getSecond() + ": ");
             Map<String, Pair<String, IntPair>> attVals = markupMap.get(offsets).attributes;

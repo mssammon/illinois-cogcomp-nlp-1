@@ -17,25 +17,25 @@ import java.util.regex.Pattern;
  * <p>
  * This is the state machine used to parse text.
  * </p>
- * 
+ *
  * <p>
  * The parsing states are defined by the {@link TokenizerState} enumeration, the state transition
  * set is defined by the {@link TokenType} enumeration. These two enumerations define the dimensions
  * of the state machine matrix.
  * </p>
- * 
+ *
  * <p>
  * States are assumed to be nested rather than linear, so there is a state stack that contains
  * {@link State} objects that encapsulate the state object as well as logic to manage poping and
  * pushing that state. So the state objects do the work of actually creating the TextAnnotation
  * objects.
  * <p>
- * 
+ *
  * <p>
  * The StateProcessor interface defines the interface class instances that operate on state
  * transitions must adhere to to process new tokens as they are presented to the state machine
  * </p>
- * 
+ *
  * Potential issues:
  * <ol>
  * <li>URLs, when we encounter a ":", we check for protocol, if we find a protocol name following a
@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
  * leave the word together including the "'" unless it is one of the common contractions like 's,
  * 'm, 're, et cetera.
  * </ol>
- * 
+ *
  * @author redman
  */
 public class TokenizerStateMachine {
@@ -152,7 +152,7 @@ public class TokenizerStateMachine {
                                         } else {
                                             if (advance > 1
                                                     && (next == '\000' || Character
-                                                            .isWhitespace(next))) {
+                                                    .isWhitespace(next))) {
                                                 // LAM-WRONG couple of numbers separated by a '/',
                                                 // make it one word.
                                                 return;
@@ -163,9 +163,9 @@ public class TokenizerStateMachine {
                                 }
                                 pop(current); // the current word is finished.
                                 push(new State(TokenizerState.IN_SPECIAL), current); // No matter
-                                                                                     // what we push
-                                                                                     // a new word
-                                                                                     // token.
+                                // what we push
+                                // a new word
+                                // token.
                                 break;
                             case ',':
                                 // numbers well may contain a comma or a period, check for an
@@ -174,7 +174,7 @@ public class TokenizerStateMachine {
                                     if (current < (text.length - 1)
                                             && Character.isDigit(text[current + 1])) {
                                         return; // next char is a digit, this is likely just part of
-                                                // the number, continue word
+                                        // the number, continue word
                                     }
                                 } else {
                                     // we need a space after a "," to recognize as punctuation
@@ -184,9 +184,9 @@ public class TokenizerStateMachine {
                                 }
                                 pop(current); // the current word is finished.
                                 push(new State(TokenizerState.IN_SPECIAL), current); // No matter
-                                                                                     // what we push
-                                                                                     // a new word
-                                                                                     // token.
+                                // what we push
+                                // a new word
+                                // token.
                                 break;
                             case '-': {
                                 // If there is a character before and after, this is a word.
@@ -197,10 +197,10 @@ public class TokenizerStateMachine {
                                          if (!((Character.isAlphabetic(before) || Character.isDigit(before)) && (Character
                                                 .isAlphabetic(after) || Character.isDigit(after)))) {*/
 
-                                    if (splitOnDash == true) {
+                                    //if (splitOnDash == true) {
                                         pop(current); // the current word is finished.
                                         push(new State(TokenizerState.IN_SPECIAL), current);
-                                    }
+                                    //}
                                 }
                                 return;
                             }
@@ -231,11 +231,11 @@ public class TokenizerStateMachine {
                                         // it is an "'s" or "'m", like it's or I'm.
                                         pop(current); // the current word is finished.
                                         push(new State(TokenizerState.IN_WORD), current); // make 's
-                                                                                          // words
-                                                                                          // in
-                                                                                          // their
-                                                                                          // own
-                                                                                          // right.
+                                        // words
+                                        // in
+                                        // their
+                                        // own
+                                        // right.
                                     } else if ((nc == 'r' && nnc == 'e')
                                             && (nnnc == '\000' || Character.isWhitespace(nnnc))) {
                                         pop(current);
@@ -284,7 +284,7 @@ public class TokenizerStateMachine {
                                 char c = peek(1);
                                 if (!Character.isWhitespace(c)
                                         && (c != ',' && c != '"' && c != '.' && c != '?'
-                                                && c != '!' && c != '-' && c != '\'' && c != '`')) {
+                                        && c != '!' && c != '-' && c != '\'' && c != '`')) {
 
                                     // probably not an end of line if next character is not a space.
                                     if (getCurrent().isNumeric()) {
@@ -309,10 +309,13 @@ public class TokenizerStateMachine {
                                     // word or a "-"
                                     if (getCurrent().isAbbr())
                                         return; // previous was upper case, acronym and word
-                                                // continues
+                                        // continues
+                                    else if (getCurrent().isSpecialMeaning()){
+                                        return;
+                                    }
                                     else
                                         ; // we will pass through, this is not an acronym, so must
-                                          // be a special character.
+                                    // be a special character.
                                 }
                             }
                             default:
@@ -355,8 +358,8 @@ public class TokenizerStateMachine {
                         if (peek(-1) != token) {
                             pop(current); // the current word is finished.
                             push(new State(TokenizerState.IN_SPECIAL), current); // No matter what
-                                                                                 // we push a new
-                                                                                 // word token.
+                            // we push a new
+                            // word token.
                         }
                     }
                 },
@@ -434,7 +437,7 @@ public class TokenizerStateMachine {
 
     /**
      * Any number of periods beyond two will continue the sentence rather than ending it..
-     * 
+     *
      * @return return true if continue previous sentence.
      */
     protected boolean isContinue() {
@@ -453,7 +456,7 @@ public class TokenizerStateMachine {
     /**
      * We have encountered a colon in the input data stream, check to see if it is a URL, and if it
      * is, advance the cursor and return true, or return false.
-     * 
+     *
      * @return return true if it is a url.
      */
     protected boolean isURL() {
@@ -500,7 +503,7 @@ public class TokenizerStateMachine {
 
     /**
      * get the character at the given offset from the current position.
-     * 
+     *
      * @param offset the offset from the current position.
      * @return the next character that will be processed.
      */
@@ -514,7 +517,7 @@ public class TokenizerStateMachine {
 
     /**
      * get the current state.
-     * 
+     *
      * @return the current word.
      */
     protected State getCurrent() {
@@ -523,7 +526,7 @@ public class TokenizerStateMachine {
 
     /**
      * Pop the current state identifier off the stack.
-     * 
+     *
      * @param where the position to terminate the previous token and start the new one.
      * @return true if popped the last item off the stack.
      */
@@ -544,7 +547,7 @@ public class TokenizerStateMachine {
 
     /**
      * Push a new state identifier off the stack.
-     * 
+     *
      * @param newState the new state to push.
      * @param where the start position.
      */
@@ -556,7 +559,7 @@ public class TokenizerStateMachine {
 
     /**
      * Get the next word, this is a lookahead operation.
-     * 
+     *
      * @returns the next word.
      */
     String getNextWord() {
@@ -583,7 +586,7 @@ public class TokenizerStateMachine {
      * <li>sentenceEndPositions - this array of integers(int[]) indicates the end of the sentence
      * objects.</li>
      * </ul>
-     * 
+     *
      * @param intext the text to parse.
      */
     protected void parseText(String intext) {
@@ -612,7 +615,7 @@ public class TokenizerStateMachine {
 
     /**
      * classify the character.
-     * 
+     *
      * @param c the character to categorize.
      * @return the index of the associated type.
      */
@@ -637,7 +640,7 @@ public class TokenizerStateMachine {
     // define our states
     /**
      * State when we are in a sentence.
-     * 
+     *
      * @author redman
      */
     final class State {
@@ -652,7 +655,7 @@ public class TokenizerStateMachine {
 
         /**
          * Create a new span.
-         * 
+         *
          * @param s the state at the start.
          */
         State(TokenizerState s) {
@@ -661,7 +664,7 @@ public class TokenizerStateMachine {
 
         /**
          * check to see if the word is all uppercase and periods, indicating an acronym
-         * 
+         *
          * @return true if all uppercase and periods.
          */
         public boolean isAbbr() {
@@ -766,9 +769,25 @@ public class TokenizerStateMachine {
             return true;
         }
 
+        public boolean isSpecialMeaning(){
+            String term = getWord().toLowerCase();
+            if (term.equals("u.s") ||
+                    term.equals("u.k") ||
+                    term.equals("u.n") ||
+                    term.equals("u") ||
+                    term.equals("ft") ||
+                    term.equals("mt") ||
+                    term.equals("mr") ||
+                    term.equals("dc") ||
+                    term.equals("p.o.w")){
+                return true;
+            }
+            return false;
+        }
+
         /**
          * get the current word if we can.
-         * 
+         *
          * @return the word for this token.
          */
         public String getWord() {
@@ -780,7 +799,7 @@ public class TokenizerStateMachine {
 
         /**
          * get the current word if we can.
-         * 
+         *
          * @return true if the word is numeric.
          */
         public boolean isNumeric() {
@@ -795,7 +814,7 @@ public class TokenizerStateMachine {
 
         /**
          * The content is being pushed onto the stack.
-         * 
+         *
          * @param where the index of the text for this span.
          */
         public void push(int where) {
@@ -804,7 +823,7 @@ public class TokenizerStateMachine {
 
         /**
          * the state is being popped off.
-         * 
+         *
          * @param where where we are during the pop.
          */
         public void pop(int where) {
@@ -813,7 +832,7 @@ public class TokenizerStateMachine {
 
         /**
          * the index of the enumeration.
-         * 
+         *
          * @return index of the enumeration.
          */
         public int stateIndex() {
@@ -822,7 +841,7 @@ public class TokenizerStateMachine {
 
         /**
          * the size fo the content.
-         * 
+         *
          * @return the size of the span.
          */
         public int size() {

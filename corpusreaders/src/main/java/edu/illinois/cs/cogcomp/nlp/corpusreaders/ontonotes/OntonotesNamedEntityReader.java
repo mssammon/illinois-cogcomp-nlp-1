@@ -11,12 +11,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import edu.illinois.cs.cogcomp.annotation.AnnotatorException;
 import edu.illinois.cs.cogcomp.annotation.XmlTextAnnotationMaker;
@@ -30,7 +25,7 @@ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.XmlTextAnnotat
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.core.utilities.SerializationHelper;
 import edu.illinois.cs.cogcomp.core.utilities.XmlDocumentProcessor;
-import edu.illinois.cs.cogcomp.core.utilities.XmlDocumentProcessor.SpanInfo;
+import edu.illinois.cs.cogcomp.core.utilities.SpanInfo;
 import edu.illinois.cs.cogcomp.nlp.corpusreaders.AnnotationReader;
 import edu.illinois.cs.cogcomp.nlp.corpusreaders.CorpusReaderConfigurator;
 import edu.illinois.cs.cogcomp.nlp.corpusreaders.ereReader.CoNLL2002Writer;
@@ -81,8 +76,7 @@ public class OntonotesNamedEntityReader extends AnnotationReader<XmlTextAnnotati
      * Reads the specified sections from penn treebank
      * @param nerHome The directory that points to the merged (mrg) files of the WSJ portion
      * @param language the language
-     * @param annotationFileExtension the name of the annotation file
-     * @throws IOException 
+     * @throws IOException
      * @throws IllegalArgumentException 
      */
     public OntonotesNamedEntityReader(String nerHome, String language) 
@@ -96,6 +90,54 @@ public class OntonotesNamedEntityReader extends AnnotationReader<XmlTextAnnotati
         while (di.hasNext()) {
             filelist.add(di.next());
         }
+    }
+
+    /**
+     * This class will read the ontonotes data from the provided directory, and write the resulting
+     * NER view data to the specified output directory in CoNLL column format. It will retain
+     * the directory structure of the original data.
+     * @param args command lines args specify input data directory, language and output directory.
+     * @throws IOException
+     */
+    static public void main(String[] args) throws IOException {
+        if (args.length < 3) {
+            System.err.println("This executable requires three arguments:\n"
+                    + " OntonotesTreebankReader <OntoNotes Directory> <language> <output_directory>");
+            System.exit(-1);
+        }
+
+        String topdir = args[0];
+        String outputdir = args[2];
+        OntonotesNamedEntityReader otr = new OntonotesNamedEntityReader(topdir, args[1]);
+        int count = 0;
+        final boolean producejson = false;
+        while (otr.hasNext()) {
+            XmlTextAnnotation xta = otr.next();
+            String path = otr.currentfile;
+            if (producejson) {
+                try {
+                    String json = SerializationHelper.serializeToJson(xta.getTextAnnotation());
+                    String outfile = otr.currentfile.replace(topdir, args[2]);
+                    File outputfile = new File(outfile);
+                    outputfile.getParentFile().mkdirs();
+                    try (PrintWriter out = new PrintWriter(outputfile)) {
+                        out.print(json);
+                    }
+                } catch (Throwable t) {
+                    System.out.println(otr.currentfile+" produced the incorrect offset.");
+                }
+            } else {
+                TextAnnotation ta = xta.getTextAnnotation();
+                path = outputdir+path.substring(topdir.length());
+                path += ".conll";
+                System.out.println(count+":"+path);
+                CoNLL2002Writer.writeViewInCoNLL2003Format(ta.getView(ViewNames.NER_ONTONOTES), ta, path);
+            }
+            count++;
+            if ((count % 10) == 0)
+                System.out.println("Completed "+count+" of "+otr.filelist.size());
+        }
+        System.out.println(otr.generateReport());
     }
 
     /**
@@ -144,23 +186,23 @@ public class OntonotesNamedEntityReader extends AnnotationReader<XmlTextAnnotati
      * @throws AnnotatorException
      */
     private XmlTextAnnotation nextAnnotation(String data,String docid) throws AnnotatorException {
-        
+
         // we keep everything.
         XmlDocumentProcessor xmlProcessor = new XmlDocumentProcessor(tagsWithText, tagsWithAtts, dropTags, true);
         StatefulTokenizer st = new StatefulTokenizer();
         TokenizerTextAnnotationBuilder taBuilder = new TokenizerTextAnnotationBuilder(st);
         XmlTextAnnotationMaker xtam = new XmlTextAnnotationMaker(taBuilder, xmlProcessor);
- 
+
         // read the file and create the annotation.
         XmlTextAnnotation xta = xtam.createTextAnnotation(data, "OntoNotes 5.0", docid);
         TextAnnotation ta = xta.getTextAnnotation();
         List<SpanInfo> fudge = xta.getXmlMarkup();
- 
+
         // create the named entity vi
         View nerView = new SpanLabelView(ViewNames.NER_ONTONOTES, ta);
         for (SpanInfo si : fudge) {
             if ("enamex".equalsIgnoreCase(si.label)) {
- 
+
                 IntPair charOffsets = si.spanOffsets;
                 String neLabel = si.attributes.get("type").getFirst();
                 int cleanTextCharStart = xta.getXmlSt().computeModifiedOffsetFromOriginal(charOffsets.getFirst());
@@ -205,55 +247,9 @@ public class OntonotesNamedEntityReader extends AnnotationReader<XmlTextAnnotati
         }
     }
 
-    @Override
-    protected void initializeReader() {
     }
     
-    /**
-     * This class will read the ontonotes data from the provided directory, and write the resulting
-     * NER view data to the specified output directory in CoNLL column format. It will retain
-     * the directory structure of the original data.
-     * @param args command lines args specify input data directory, language and output directory.
-     * @throws IOException
-     */
-    static public void main(String[] args) throws IOException {
-        if (args.length < 3) {
-            System.err.println("This executable requires three arguments:\n"
-                    + " OntonotesTreebankReader <OntoNotes Directory> <language> <output_directory>");
-            System.exit(-1);
-        }
-        
-        String topdir = args[0];
-        String outputdir = args[2];
-        OntonotesNamedEntityReader otr = new OntonotesNamedEntityReader(topdir, args[1]);
-        int count = 0;
-        final boolean producejson = false;
-        while (otr.hasNext()) {
-            XmlTextAnnotation xta = otr.next();
-            String path = otr.currentfile;
-            if (producejson) {
-                try {
-                    String json = SerializationHelper.serializeToJson(xta.getTextAnnotation());
-                    String outfile = otr.currentfile.replace(topdir, args[2]);
-                    File outputfile = new File(outfile);
-                    outputfile.getParentFile().mkdirs();
-                    try (PrintWriter out = new PrintWriter(outputfile)) {
-                        out.print(json);
-                    }
-                } catch (Throwable t) {
-                    System.out.println(otr.currentfile+" produced the incorrect offset.");
-                }
-            } else {
-                TextAnnotation ta = xta.getTextAnnotation();
-                path = outputdir+path.substring(topdir.length());
-                path += ".conll";
-                System.out.println(count+":"+path);
-                CoNLL2002Writer.writeViewInCoNLL2003Format(ta.getView(ViewNames.NER_ONTONOTES), ta, path);
-            }
-            count++;
-            if ((count % 10) == 0)
-                System.out.println("Completed "+count+" of "+otr.filelist.size());
-        }
-        System.out.println(otr.generateReport());
+    @Override
+    protected void initializeReader() {
     }
 }

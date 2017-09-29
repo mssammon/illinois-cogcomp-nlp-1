@@ -204,19 +204,7 @@ public abstract class Annotator {
     }
 
     /**
-     * Same lazy view function, but with resource parameters
-     * First, checks whether model is initialized, and calls initialize() if not. Then, calls
-     * addView(). IMPORTANT: clients should always call getView().
-     */
-    private void lazyAddView(TextAnnotation ta, ResourceManager runtimeAttributes) throws AnnotatorException {
-        if (!isInitialized()) {
-            doInitialize();
-        }
-        addView(ta, runtimeAttributes);
-    }
-
-    /**
-     * Can be used internally by {@link BasicAnnotatorService} to check for pre-requisites before
+     * Can be used internally by {@link CachingAnnotatorService} to check for pre-requisites before
      * calling any single (external) {@link Annotator}.
      *
      * @return The list of {@link edu.illinois.cs.cogcomp.core.datastructures.ViewNames} required by

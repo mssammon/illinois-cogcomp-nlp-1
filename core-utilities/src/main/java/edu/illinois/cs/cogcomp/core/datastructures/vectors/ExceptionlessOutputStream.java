@@ -27,6 +27,16 @@ public class ExceptionlessOutputStream extends FilterOutputStream {
 
 
     /**
+     * Creates a new data output stream to write data to the specified underlying output stream.
+     *
+     * @param out The underlying output stream.
+     **/
+    public ExceptionlessOutputStream(OutputStream out) {
+        super(new DataOutputStream(out));
+        dos = (DataOutputStream) this.out;
+    }
+
+    /**
      * Opens a buffered (and uncompressed) stream for writing to the specified file.
      *
      * @param filename The file to write to.
@@ -47,7 +57,6 @@ public class ExceptionlessOutputStream extends FilterOutputStream {
 
         return eos;
     }
-
 
     /**
      * Opens a compressed stream for writing to the specified file.
@@ -71,7 +80,6 @@ public class ExceptionlessOutputStream extends FilterOutputStream {
         return eos;
     }
 
-
     /**
      * Opens a buffered (and uncompressed) stream for writing to the specified file. If the
      * specified URL does not reference a file on the local file system, an error message will be
@@ -90,7 +98,6 @@ public class ExceptionlessOutputStream extends FilterOutputStream {
 
         return openBufferedStream(url.getFile());
     }
-
 
     /**
      * Opens a buffered stream for writing to the specified file. If the specified URL does not
@@ -111,20 +118,8 @@ public class ExceptionlessOutputStream extends FilterOutputStream {
         return openCompressedStream(url.getFile());
     }
 
-
     /**
-     * Creates a new data output stream to write data to the specified underlying output stream.
-     *
-     * @param out The underlying output stream.
-     **/
-    public ExceptionlessOutputStream(OutputStream out) {
-        super(new DataOutputStream(out));
-        dos = (DataOutputStream) this.out;
-    }
-
-
-    /**
-     * Whenever an exception is caught, this method attempts to close the stream and exit the
+     * Whenever an exception is caught, this method attempts to closeCache the stream and exit the
      * program.
      *
      * @param e The thrown exception.
@@ -144,7 +139,7 @@ public class ExceptionlessOutputStream extends FilterOutputStream {
         try {
             dos.close();
         } catch (Exception e) {
-            System.err.println("Can't close output stream:");
+            System.err.println("Can't closeCache output stream:");
             e.printStackTrace();
             System.exit(1);
         }

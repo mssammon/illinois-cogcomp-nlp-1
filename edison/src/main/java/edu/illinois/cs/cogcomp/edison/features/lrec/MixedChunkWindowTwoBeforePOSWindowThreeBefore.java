@@ -36,10 +36,8 @@ import java.io.IOException;
  *
  */
 public class MixedChunkWindowTwoBeforePOSWindowThreeBefore implements FeatureExtractor {
-    private static Logger logger = LoggerFactory.getLogger(MixedChunkWindowTwoBeforePOSWindowThreeBefore.class);
-
     public static View SHALLOW_PARSE, POS, TOKENS;
-
+    private static Logger logger = LoggerFactory.getLogger(MixedChunkWindowTwoBeforePOSWindowThreeBefore.class);
     private final String viewName;
 
     public MixedChunkWindowTwoBeforePOSWindowThreeBefore(String viewName) {
@@ -166,7 +164,7 @@ public class MixedChunkWindowTwoBeforePOSWindowThreeBefore implements FeatureExt
 
         // Closing BufferedWriter Stream
         /*
-         * bw.close();
+         * bw.closeCache();
          * 
          * } catch ( IOException e ) { e.printStackTrace(); }
          */

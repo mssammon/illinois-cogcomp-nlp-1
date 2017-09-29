@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import edu.illinois.cs.cogcomp.annotation.Annotator;
 import edu.illinois.cs.cogcomp.annotation.TextAnnotationBuilder;
 import edu.illinois.cs.cogcomp.annotation.XmlTextAnnotationMaker;
 import edu.illinois.cs.cogcomp.core.datastructures.IntPair;
@@ -27,12 +26,12 @@ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.XmlTextAnnotat
 import edu.illinois.cs.cogcomp.core.io.IOUtils;
 import edu.illinois.cs.cogcomp.core.utilities.XmlDocumentProcessor;
 import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
+import edu.illinois.cs.cogcomp.core.utilities.SpanInfo;
 import edu.illinois.cs.cogcomp.nlp.corpusreaders.ACEReader;
 import edu.illinois.cs.cogcomp.nlp.corpusreaders.CorpusReaderConfigurator;
 import edu.illinois.cs.cogcomp.nlp.corpusreaders.XmlDocumentReader;
 import edu.illinois.cs.cogcomp.nlp.tokenizer.StatefulTokenizer;
 import edu.illinois.cs.cogcomp.nlp.utility.TokenizerTextAnnotationBuilder;
-import org.apache.commons.io.filefilter.FileFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -187,7 +186,7 @@ public class EREDocumentReader extends XmlDocumentReader {
      *
      * @param ereCorpusVal a value corresponding to enum EreCorpus (e.g. 'ENR1', 'ENR2', or 'ENR3')
      * @param throwExceptionOnXmlParseFailure if 'true', xml reader will throw an exception if it finds e.g.
-     *                                        mismatched xml tag open/close
+     *                                        mismatched xml tag open/closeCache
      * @return an XmlTextAnnotationMaker configured for the specified ERE corpus
      * @throws Exception
      */
@@ -407,11 +406,11 @@ public class EREDocumentReader extends XmlDocumentReader {
      */
     private void createAndAddXmlMarkupAnnotations(XmlTextAnnotation xmlTa) {
 
-        List<XmlDocumentProcessor.SpanInfo> markup = xmlTa.getXmlMarkup();
+        List<SpanInfo> markup = xmlTa.getXmlMarkup();
         TextAnnotation ta = xmlTa.getTextAnnotation();
         View postView = new View(getPostViewName(), NAME, ta, 1.0);
 
-        for (XmlDocumentProcessor.SpanInfo spanInfo : markup) {
+        for (SpanInfo spanInfo : markup) {
 
             String label = spanInfo.label;
 

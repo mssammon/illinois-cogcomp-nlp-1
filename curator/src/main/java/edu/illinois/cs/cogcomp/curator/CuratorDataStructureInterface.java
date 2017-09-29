@@ -77,7 +77,7 @@ public class CuratorDataStructureInterface {
 
         // if we have started a sentence and seen some tokens, but not closed
         // it, then there is something wrong. However, to make things easy,
-        // let's close the sentence with the expected sentence boundary.
+        // let's closeCache the sentence with the expected sentence boundary.
         if (!endedSentence) {
             sentenceEndPositions[sentenceId] = tokenId;
         }

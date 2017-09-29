@@ -9,7 +9,7 @@ package edu.illinois.cs.cogcomp.pipeline.main;
 
 import edu.illinois.cs.cogcomp.annotation.AnnotatorException;
 import edu.illinois.cs.cogcomp.annotation.AnnotatorServiceConfigurator;
-import edu.illinois.cs.cogcomp.annotation.BasicAnnotatorService;
+import edu.illinois.cs.cogcomp.annotation.CachingAnnotatorService;
 import edu.illinois.cs.cogcomp.core.datastructures.ViewNames;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.Constituent;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
@@ -38,8 +38,8 @@ public class SentencePipelineTest {
     private static final java.lang.String POS_FILE = "src/test/resources/pipelinePosText.txt";
     private static final String CACHE_DIR = "pipeline-cache";
     private static final String CACHE_DIR_SENTENCE = "pipeline-cache_sentence";
-    private static BasicAnnotatorService sentenceProcessor;
-    private static BasicAnnotatorService normalProcessor;
+    private static CachingAnnotatorService sentenceProcessor;
+    private static CachingAnnotatorService normalProcessor;
 
     @BeforeClass
     public static void init() throws IOException, AnnotatorException {

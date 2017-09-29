@@ -32,31 +32,24 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author Christos Christodoulopoulos
  */
 public class TextAnnotationMapDBHandler implements TextAnnotationCache {
+    private final String dbFile;
     private DB db;
     private Logger logger = LoggerFactory.getLogger(TextAnnotationMapDBHandler.class);
+    private boolean isOpen;
 
     public TextAnnotationMapDBHandler(String dbFile) {
-        try {
-            // enabling transactions avoids cache corruption if service fails.
-            this.db = DBMaker.fileDB(dbFile).closeOnJvmShutdown().transactionEnable().make();
-        }
-        catch (DBException e) {
-//            logger.warn("mapdb couldn't instantiate db using file '{}': check error and either remove lock, " +
-//                    "repair file, or delete file.", dbFile);
-            e.printStackTrace();
-            System.err.println("mapdb couldn't instantiate db using file '" + dbFile +
-                    "': check error and either remove lock, repair file, or delete file.");
-            throw e;
-        }
+        this.dbFile = dbFile;
+        openCache();
     }
     /**
      * MapDB requires the database to be closed at the end of operations. This is usually handled by the
      * {@code closeOnJvmShutdown()} snippet in the initializer, but this method needs to be called if
      * multiple instances of the {@link TextAnnotationMapDBHandler} are used.
      */
-    public void close() {
+    public void closeCache() {
         db.commit();
         db.close();
+        isOpen = false;
     }
 
     /**
@@ -155,6 +148,30 @@ public class TextAnnotationMapDBHandler implements TextAnnotationCache {
             }
         }
         return null;
+    }
+
+
+    @Override
+    public void openCache() {
+        try {
+            // enabling transactions avoids cache corruption if service fails.
+            this.db = DBMaker.fileDB(dbFile).closeOnJvmShutdown().transactionEnable().make();
+        }
+        catch (DBException e) {
+//            logger.warn("mapdb couldn't instantiate db using file '{}': check error and either remove lock, " +
+//                    "repair file, or delete file.", dbFile);
+            e.printStackTrace();
+            System.err.println("mapdb couldn't instantiate db using file '" + dbFile +
+                    "': check error and either remove lock, repair file, or delete file.");
+            throw e;
+        }
+        isOpen = true;
+
+    }
+
+    @Override
+    public boolean isCacheOpen() {
+        return isOpen;
     }
 
     private ConcurrentMap<Integer, byte[]> getMap(String dataset) {

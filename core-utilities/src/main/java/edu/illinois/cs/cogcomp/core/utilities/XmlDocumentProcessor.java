@@ -10,7 +10,6 @@ package edu.illinois.cs.cogcomp.core.utilities;
 import edu.illinois.cs.cogcomp.core.datastructures.IntPair;
 import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 
-import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -26,7 +25,7 @@ import static edu.illinois.cs.cogcomp.core.utilities.TextCleanerStringTransforma
  *    escaped characters in an initial step.
  *
  * TODO: add constructor field to allow additional text clean/transform ops
- * TODO: handle lone open/close tags: ideally, delete them, but at least transform them to avoid angle bracket
+ * TODO: handle lone open/closeCache tags: ideally, delete them, but at least transform them to avoid angle bracket
  *       parse problems in NLP components; retain relevant info like URL target etc.
  */
 
@@ -49,7 +48,7 @@ public class XmlDocumentProcessor {
      * @param deletableSpanTags the names of tags containing text to be excluded from clean text (e.g. quotes)
      * @param tagsWithAtts the names of tags containing the attributes to retain, paired with sets of attribute names
      *                     MUST BE LOWERCASE.
-     * @param singletonTags the names of one-off tags (i.e. no close tag) whose contents must be skipped entirely
+     * @param singletonTags the names of one-off tags (i.e. no closeCache tag) whose contents must be skipped entirely
      */
     public XmlDocumentProcessor(Set<String> deletableSpanTags, Map<String, Set<String>> tagsWithAtts,
                                 Set<String> singletonTags, boolean throwExceptionOnUnrecognizedTag) {
@@ -70,7 +69,7 @@ public class XmlDocumentProcessor {
 
         Map<IntPair, Set<String>> attrVals = new HashMap<>();
 
-        for (XmlDocumentProcessor.SpanInfo si : xmlMarkup) {
+        for (SpanInfo si : xmlMarkup) {
             for (Map.Entry<String, Pair<String, IntPair>> e : si.attributes.entrySet()) {
 
                 IntPair offset = e.getValue().getSecond();
@@ -138,7 +137,7 @@ public class XmlDocumentProcessor {
 
         // span offsets, label, attName, attVal, attOffsets
         List<SpanInfo> attributesRetained = new ArrayList<>();
-        // track open/close tags, to record spans for later use (e.g. quoted blocks that aren't annotated)
+        // track open/closeCache tags, to record spans for later use (e.g. quoted blocks that aren't annotated)
         // each entry retains tagname, open tag offsets, attributes
         // note that open tag offsets are NOT the same as the (complete span) offsets returned by this method
         // IMPORTANT: offsets are computed from modified xml string (initial normalization steps clean up original)
@@ -151,7 +150,7 @@ public class XmlDocumentProcessor {
         // track whether or not a tag is nested within something marked for deletion
         int deletableNestingLevel = 0;
 
-        // match mark-up: xml open or close tag
+        // match mark-up: xml open or closeCache tag
         while (xmlMatcher.find()) {
             String substr = xmlMatcher.group(0);
             boolean isClose = false;
@@ -178,17 +177,17 @@ public class XmlDocumentProcessor {
 
                     String openTagName = openTagAndAtts.label;
 
-                    // check for lone tags (open without close or vice versa )
+                    // check for lone tags (open without closeCache or vice versa )
                     boolean isLoneClose = false;
                     while (!openTagName.equals(tagName) && !isLoneClose) {
 
                         if (throwExceptionOnUnrecognizedTag)
-                            throw new IllegalStateException("Mismatched open and close tags. Expected '" + openTagAndAtts +
+                            throw new IllegalStateException("Mismatched open and closeCache tags. Expected '" + openTagAndAtts +
                                     "', found '" + tagName + "'");
                         else {//someone used xml special chars in body text
-                            logger.warn("WARNING: found close tag '{}' after open tag '{}', and (obviously) they don't match.",
+                            logger.warn("WARNING: found closeCache tag '{}' after open tag '{}', and (obviously) they don't match.",
                                     tagName, openTagName);
-                            if (!tagStack.isEmpty()) { // if lone tag is a close tag, hope that the open stack is empty
+                            if (!tagStack.isEmpty()) { // if lone tag is a closeCache tag, hope that the open stack is empty
                                 openTagAndAtts = tagStack.peek();
                                 openTagName = openTagAndAtts.label;
                                 if (!openTagAndAtts.equals(tagName))
@@ -196,7 +195,7 @@ public class XmlDocumentProcessor {
                                 else
                                     openTagAndAtts = tagStack.pop(); //it matched, so we're good now
                             }
-                            else { //unmatched lone close
+                            else { //unmatched lone closeCache
                                 isLoneClose = true;
                             }
                         }
@@ -205,7 +204,7 @@ public class XmlDocumentProcessor {
                     if (isLoneClose) { //revert to previous state, and resume parsing
                         tagStack.push(openTagAndAtts);
                     }
-                    else {// now we have open tag and matching close tag; record span and label
+                    else {// now we have open tag and matching closeCache tag; record span and label
                         IntPair startTagOffsets = openTagAndAtts.spanOffsets;
                         Map<String, Pair<String, IntPair>> spanAtts = openTagAndAtts.attributes;
 
@@ -231,12 +230,12 @@ public class XmlDocumentProcessor {
                      * else
                      *    delete
                      * else we are NOT in deletable and NOT nested:
-                     *    delete open and close tags.
+                     *    delete open and closeCache tags.
                      */
                         if (deletableNestingLevel == 0) {
                             if (isDeletable)
                                 xmlTextSt.transformString(startTagStart, endTagEnd, "");
-                            else { // we should retain text between open and close, but delete the tags
+                            else { // we should retain text between open and closeCache, but delete the tags
                                 xmlTextSt.transformString(startTagStart, startTagEnd, "");
                                 xmlTextSt.transformString(endTagStart, endTagEnd, "");
                             }
@@ -337,7 +336,7 @@ public class XmlDocumentProcessor {
 
     /**
      * delete all spans that correspond to singleton tags (i.e. self-contained span presented as open tag with
-     *    attributes, but no corresponding close). Relies on user specifying these ahead of time.
+     *    attributes, but no corresponding closeCache). Relies on user specifying these ahead of time.
      * @param xmlTextSt StringTransformation containing text to be searched.
      * @return StringTransformation with appropriate edits.
      */
@@ -347,7 +346,7 @@ public class XmlDocumentProcessor {
 
         Map<IntPair, Map<String, String>> attributesRetained = new HashMap<>();
 
-        // match mark-up: xml open or close tag
+        // match mark-up: xml open or closeCache tag
         while (xmlMatcher.find()) {
 
             String substr = xmlMatcher.group(0);
@@ -372,23 +371,4 @@ public class XmlDocumentProcessor {
         xmlTextSt.applyPendingEdits();
         return xmlTextSt;
     }
-
-    /**
-     * a structure to store span information: label, offsets, attributes (including value offsets)
-     */
-    public class SpanInfo implements Serializable {
-
-        public final String label;
-        public final IntPair spanOffsets;
-        public final Map<String, Pair<String, IntPair>> attributes;
-
-        public SpanInfo(String label, IntPair spanOffsets, Map<String, Pair<String, IntPair>> attributes ) {
-            this.label = label;
-            this.spanOffsets = spanOffsets;
-            this.attributes = attributes;
-        }
-    }
-
-
-
 }

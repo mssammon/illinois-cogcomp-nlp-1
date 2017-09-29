@@ -43,61 +43,32 @@ import edu.illinois.cs.cogcomp.nlp.utility.TokenizerTextAnnotationBuilder;
  */
 public class Main extends AbstractMain {
 
-    /** set to true to produce bracketed output, otherwise CoNLL output. */
-    boolean bracketedOutput = true;
-
-    /**
-     * enumerates the various input processing states.
-     */
-    enum InputSwitch {
-
-        /** we are in menu page. */
-        MENU,
-
-        /** enter the input file or directory. */
-        ENTER_IN,
-
-        /** enter the output file or directory. */
-        ENTER_OUT,
-
-        /** enter a string to process. */
-        ENTER_STRING,
-
-        /** show the configuration parameters. */
-        SHOW_CONFIG
-    };
-
-    /** set to indicate a property has changed required a reload of the ner annotator. */
-    private boolean changedproperty = false;
-
-    /** our current input state. */
-    InputSwitch inswitch = InputSwitch.MENU;
-
-    /** input directory (or file) containing data to run. */
-    protected File indirectory = null;
-
-    /** output directory (or file) for resulting tagged data. */
-    protected File outdirectory = null;
-
     /** this helper can create text annotations from text. */
     protected final TextAnnotationBuilder tab = new TokenizerTextAnnotationBuilder(
             new StatefulTokenizer());
-
+    /** input directory (or file) containing data to run. */
+    protected File indirectory = null;;
+    /** output directory (or file) for resulting tagged data. */
+    protected File outdirectory = null;
     /** the NER annotator. */
     protected NERAnnotator nerAnnotator = null;
-
+    /** set to true to produce bracketed output, otherwise CoNLL output. */
+    boolean bracketedOutput = true;
+    /** our current input state. */
+    InputSwitch inswitch = InputSwitch.MENU;
+    /** set to indicate a property has changed required a reload of the ner annotator. */
+    private boolean changedproperty = false;
     /**
      * the result processor determines how to produce output, on standard out, a single file or
      * files in a directory.
      */
     private ResultProcessor rp = null;
-
     /** the resource manager contains all the properties. */
     private ResourceManager resourceManager;
 
     /**
      * The only argument we take is the config file.
-     * 
+     *
      * @param args
      */
     public Main(String[] args) {
@@ -106,6 +77,16 @@ public class Main extends AbstractMain {
         // the subclass must call the method to process arguments, or the initialization
         // of field variables is done after the initialization fo the superclass.
         processArguments(args);
+    }
+
+    /**
+     * All we need to do is call the constructor, it will parse args, set everything up and run
+     * itself (it is a thread).
+     *
+     * @param args the command arguents, in this case only a config file.
+     */
+    static public void main(String[] args) {
+        new Main(args).start();
     }
 
     /**
@@ -594,10 +575,31 @@ public class Main extends AbstractMain {
         return rp;
     }
 
+/**
+     * enumerates the various input processing states.
+     */
+    enum InputSwitch {
+
+        /** we are in menu page. */
+        MENU,
+
+        /** enter the input file or directory. */
+        ENTER_IN,
+
+        /** enter the output file or directory. */
+        ENTER_OUT,
+
+        /** enter a string to process. */
+        ENTER_STRING,
+
+        /** show the configuration parameters. */
+        SHOW_CONFIG
+    }
+
     /**
      * This class processes result strings. It may append everything to one output stream, or
      * produce a separate file for each result.
-     * 
+     *
      * @author redman
      *
      */
@@ -608,7 +610,7 @@ public class Main extends AbstractMain {
 
         /**
          * write the resulting string containing labeled data.
-         * 
+         *
          * @param output the data to output.
          * @param filename the name of the file.
          * @throws Exception
@@ -616,21 +618,11 @@ public class Main extends AbstractMain {
         abstract public void publish(String output, String filename) throws Exception;
 
         /**
-         * when finished, we may need to close up.
-         * 
+         * when finished, we may need to closeCache up.
+         *
          * @param output
          * @throws Exception
          */
         abstract public void done() throws Exception;
-    }
-
-    /**
-     * All we need to do is call the constructor, it will parse args, set everything up and run
-     * itself (it is a thread).
-     * 
-     * @param args the command arguents, in this case only a config file.
-     */
-    static public void main(String[] args) {
-        new Main(args).start();
     }
 }

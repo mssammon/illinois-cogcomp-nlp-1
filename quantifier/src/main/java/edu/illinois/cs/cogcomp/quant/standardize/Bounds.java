@@ -50,7 +50,7 @@ class Bounds {
 
         String[] apList =
                 {"(?:just\\s*)?about", "around", "approx(?:imate(?:ly)?d?)?\\.?", "rough(?:ly)?",
-                        "estimated?", "some", "close(?:\\s*to|ly)?", "near(?:ly)?", "almost",
+                        "estimated?", "some", "closeCache(?:\\s*to|ly)?", "near(?:ly)?", "almost",
                         "or\\s*so", "semi", "like", "quasi(?:\\s*-\\s*)?"};
 
         String[] ltList =
@@ -69,7 +69,7 @@ class Bounds {
         String[] gtList =
                 {"(?:at\\s*)?(?:least|(?:the)?\\s*(?:lowest|least)|(?:a\\s*)?minimum(?:\\s*of)?)",
                         "above", "over", "(?:or|and)?\\s*(?:greater|more|higher)\\s*(?:than)?",
-                        "as\\s*(?:few|young|little|near|light|small|close|low|tiny)\\s*as",
+                        "as\\s*(?:few|young|little|near|light|small|closeCache|low|tiny)\\s*as",
                         "following", "upwards(?:\\s*of)?", "(?:a\\s*)?minimum(?:\\s*of)?", "after",
                         "following", "since"};
 

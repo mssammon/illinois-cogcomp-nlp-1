@@ -19,74 +19,12 @@ import java.util.HashMap;
  **/
 public class POS implements Serializable {
     /**
-     * The actual part of speech is encoded as an integer.
-     */
-    private int value;
-
-
-    /**
-     * Constructor that initializes the <code>value</code> variable.  This
-     * constructor should never be called, since all possible parts of speech
-     * are numerated by name as <code>public static final</code> variables.
-     *
-     * @param v The value of the new part of speech object.
-     **/
-    public POS(int v) {
-        value = v;
-    }
-
-
-    /**
-     * Returns the name of the part of speech represented by this object.
-     */
-    public String toString() {
-        return names[value];
-    }
-
-    /**
-     * Returns the token that represents the same part of speech.
-     */
-    public String toToken() {
-        return tokens[value];
-    }
-
-
-    /**
-     * Returns the integer used to represent this part of speech tag.
-     */
-    public int getValue() {
-        return value;
-    }
-
-
-    /**
-     * Two <code>POS</code> objects are equal iff their <code>value</code>
-     * variables are equal.
-     *
-     * @param o The object to compare against this <code>POS</code> object.
-     * @return <code>true</code> iff the input object is a <code>POS</code>
-     * object with the same <code>value</code>.
-     **/
-    public boolean equals(Object o) {
-        return o instanceof POS && ((POS) o).value == value;
-    }
-
-
-    /**
-     * Simply returns the <code>value</code> variable.
-     */
-    public int hashCode() {
-        return value;
-    }
-
-
-    /**
      * An array of all names of part of speech tags. <br><br>
      * <p/>
      * Those names are: <br>
      * <ol start=0>
      * <li> pound sign <li> dollar sign <li> open double quote
-     * <li> close double quote <li> comma <li> left bracket
+     * <li> closeCache double quote <li> comma <li> left bracket
      * <li> right bracket <li> final punctuation <li> (semi-)colon
      * <li> coordinating conjunction <li> cardinal number <li> determiner
      * <li> existential there <li> foreign word <li> preposition
@@ -105,7 +43,7 @@ public class POS implements Serializable {
      **/
     public static final String[] names =
             {
-                    "pound sign", "dollar sign", "open double quote", "close double quote",
+                    "pound sign", "dollar sign", "open double quote", "closeCache double quote",
                     "comma", "left bracket", "right bracket", "final punctuation",
                     "(semi-)colon", "coordinating conjunction", "cardinal number",
                     "determiner", "existential there", "foreign word", "preposition",
@@ -119,8 +57,6 @@ public class POS implements Serializable {
                     "verb non 3rd ps. sing.  present", "verb 3rd ps.  sing.  present",
                     "wh-determiner", "wh-pronoun", "possesive wh-pronoun", "wh-adverb"
             };
-
-
     /**
      * An array of all tokens that represent parts of speech as found in
      * corpora. <br><br>
@@ -145,42 +81,6 @@ public class POS implements Serializable {
                     "TO", "UH", "VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "WDT", "WP", "WP$",
                     "WRB"
             };
-
-
-    /**
-     * Map from <code>String</code> tokens to <code>POS</code> objects.
-     */
-    private static HashMap<String, edu.illinois.cs.cogcomp.lbjava.nlp.POS> fromTokens = null;
-
-
-    /**
-     * Converts a <code>POS</code> object to the token that represents the same
-     * part of speech.
-     *
-     * @param tag The <code>POS</code> object to convert.
-     * @return The token representing the same part of speech.
-     **/
-    public static String toToken(POS tag) {
-        return tokens[tag.value];
-    }
-
-
-    /**
-     * Converts a token to the <code>POS</code> object that represents the same
-     * part of speech.
-     *
-     * @param s The token to convert.
-     * @return The <code>POS</code> object representing the same part of
-     * speech.
-     **/
-    public static POS fromToken(String s) {
-        POS result = fromTokens.get(s);
-        assert result != null
-                : "LBJava ASSERTION FAILED: Unrecognized POS tag: '" + s + "'";
-        return result;
-    }
-
-
     /**
      * <code>POS</code> object representing the "pound sign" tag.
      */
@@ -194,7 +94,7 @@ public class POS implements Serializable {
      */
     public static final POS openDoubleQuote = new POS(2);
     /**
-     * <code>POS</code> object representing the "close double quote" tag.
+     * <code>POS</code> object representing the "closeCache double quote" tag.
      */
     public static final POS closeDoubleQuote = new POS(3);
     /**
@@ -363,7 +263,10 @@ public class POS implements Serializable {
      * <code>POS</code> object representing the "wh-adverb" tag.
      */
     public static final POS WRB = new POS(44);
-
+    /**
+     * Map from <code>String</code> tokens to <code>POS</code> objects.
+     */
+    private static HashMap<String, edu.illinois.cs.cogcomp.lbjava.nlp.POS> fromTokens = null;
 
     static {
         fromTokens = new HashMap<>();
@@ -412,6 +315,87 @@ public class POS implements Serializable {
         fromTokens.put(tokens[WP.value], WP);
         fromTokens.put(tokens[WP_DOLLAR.value], WP_DOLLAR);
         fromTokens.put(tokens[WRB.value], WRB);
+    }
+
+    /**
+     * The actual part of speech is encoded as an integer.
+     */
+    private int value;
+    /**
+     * Constructor that initializes the <code>value</code> variable.  This
+     * constructor should never be called, since all possible parts of speech
+     * are numerated by name as <code>public static final</code> variables.
+     *
+     * @param v The value of the new part of speech object.
+     **/
+    public POS(int v) {
+        value = v;
+    }
+
+    /**
+     * Converts a <code>POS</code> object to the token that represents the same
+     * part of speech.
+     *
+     * @param tag The <code>POS</code> object to convert.
+     * @return The token representing the same part of speech.
+     **/
+    public static String toToken(POS tag) {
+        return tokens[tag.value];
+    }
+
+    /**
+     * Converts a token to the <code>POS</code> object that represents the same
+     * part of speech.
+     *
+     * @param s The token to convert.
+     * @return The <code>POS</code> object representing the same part of
+     * speech.
+     **/
+    public static POS fromToken(String s) {
+        POS result = fromTokens.get(s);
+        assert result != null
+                : "LBJava ASSERTION FAILED: Unrecognized POS tag: '" + s + "'";
+        return result;
+    }
+
+    /**
+     * Returns the name of the part of speech represented by this object.
+     */
+    public String toString() {
+        return names[value];
+    }
+
+    /**
+     * Returns the token that represents the same part of speech.
+     */
+    public String toToken() {
+        return tokens[value];
+    }
+
+    /**
+     * Returns the integer used to represent this part of speech tag.
+     */
+    public int getValue() {
+        return value;
+    }
+
+    /**
+     * Two <code>POS</code> objects are equal iff their <code>value</code>
+     * variables are equal.
+     *
+     * @param o The object to compare against this <code>POS</code> object.
+     * @return <code>true</code> iff the input object is a <code>POS</code>
+     * object with the same <code>value</code>.
+     **/
+    public boolean equals(Object o) {
+        return o instanceof POS && ((POS) o).value == value;
+    }
+
+    /**
+     * Simply returns the <code>value</code> variable.
+     */
+    public int hashCode() {
+        return value;
     }
 }
 

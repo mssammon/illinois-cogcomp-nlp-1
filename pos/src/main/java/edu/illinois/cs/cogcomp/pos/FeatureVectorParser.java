@@ -105,56 +105,7 @@ public class FeatureVectorParser implements Parser {
         try {
             lexIn.close();
         } catch (Exception e) {
-            System.err.println("Can't close '" + lexiconFile + "':");
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
-
-
-    /**
-     * Returns a <code>FeatureVector</code> deserialized out of the given file.
-     **/
-    public Object next() {
-        FeatureVector result = new FeatureVector();
-
-        try {
-            int features = in.readInt();
-
-            // A -1 means that there was a fold separator here
-            if (features == -1)
-                return FoldSeparator.separator;
-            else {
-                for (int i = 0; i < features; ++i)
-                    result.addLabel(lexicon[in.readInt()]);
-
-                features = in.readInt();
-                for (int i = 0; i < features; ++i)
-                    result.addFeature(lexicon[in.readInt()]);
-            }
-        } catch (EOFException eof) {
-            result = null;
-            close();
-        } catch (Exception e) {
-            System.err.println("Can't read from '" + exampleFileName + "':");
-            e.printStackTrace();
-            System.exit(1);
-        }
-
-        return result;
-    }
-
-
-    /**
-     * Resets the example file stream to the beginning. Alternatively, one could simply create a new
-     * <code>FeatureVectorParser</code> with the same constructor arguments, but this method avoids
-     * re-reading the lexicon.
-     **/
-    public void reset() {
-        try {
-            in = new DataInputStream(new BufferedInputStream(new FileInputStream(exampleFileName)));
-        } catch (Exception e) {
-            System.err.println("Can't open '" + exampleFileName + "' for input:");
+            System.err.println("Can't closeCache '" + lexiconFile + "':");
             e.printStackTrace();
             System.exit(1);
         }
@@ -188,6 +139,52 @@ public class FeatureVectorParser implements Parser {
         }
     }
 
+    /**
+     * Returns a <code>FeatureVector</code> deserialized out of the given file.
+     **/
+    public Object next() {
+        FeatureVector result = new FeatureVector();
+
+        try {
+            int features = in.readInt();
+
+            // A -1 means that there was a fold separator here
+            if (features == -1)
+                return FoldSeparator.separator;
+            else {
+                for (int i = 0; i < features; ++i)
+                    result.addLabel(lexicon[in.readInt()]);
+
+                features = in.readInt();
+                for (int i = 0; i < features; ++i)
+                    result.addFeature(lexicon[in.readInt()]);
+            }
+        } catch (EOFException eof) {
+            result = null;
+            close();
+        } catch (Exception e) {
+            System.err.println("Can't read from '" + exampleFileName + "':");
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        return result;
+    }
+
+    /**
+     * Resets the example file stream to the beginning. Alternatively, one could simply create a new
+     * <code>FeatureVectorParser</code> with the same constructor arguments, but this method avoids
+     * re-reading the lexicon.
+     **/
+    public void reset() {
+        try {
+            in = new DataInputStream(new BufferedInputStream(new FileInputStream(exampleFileName)));
+        } catch (Exception e) {
+            System.err.println("Can't open '" + exampleFileName + "' for input:");
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
 
     /** Frees any resources this parser may be holding. */
     public void close() {
@@ -196,7 +193,7 @@ public class FeatureVectorParser implements Parser {
         try {
             in.close();
         } catch (Exception e) {
-            System.err.println("Can't close '" + exampleFileName + "':");
+            System.err.println("Can't closeCache '" + exampleFileName + "':");
             e.printStackTrace();
             System.exit(1);
         }

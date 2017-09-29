@@ -53,7 +53,7 @@ public class EREEventReader extends EREMentionRelationReader {
      * @param ereCorpus                       the ERE corpus release (values from {@link EreCorpus}
      * @param corpusRoot the data root directory for the ERE corpus to be processed
      * @param throwExceptionOnXmlParseFailure if 'true', throws exception if xml parser encounters e.g. mismatched
-     *                                        open/close tags  @throws Exception
+     *                                        open/closeCache tags  @throws Exception
      */
     public EREEventReader(EreCorpus ereCorpus, String corpusRoot, boolean throwExceptionOnXmlParseFailure) throws Exception {
         this(ereCorpus, new TokenizerTextAnnotationBuilder(new StatefulTokenizer()), corpusRoot, throwExceptionOnXmlParseFailure);
@@ -66,7 +66,7 @@ public class EREEventReader extends EREMentionRelationReader {
      * @param taBldr a {@link TextAnnotationBuilder} for the desired language/tokenization behavior.
      * @param corpusRoot the data root directory for the ERE corpus to be processed
      * @param throwExceptionOnXmlParseFailure if 'true', throws exception if xml parser encounters e.g. mismatched
-     *                                        open/close tags  @throws Exception
+     *                                        open/closeCache tags  @throws Exception
      * @throws Exception if source/annotation file missing, or if xml not valid
      */
     public EREEventReader(EreCorpus ereCorpus, TextAnnotationBuilder taBldr, String corpusRoot, boolean throwExceptionOnXmlParseFailure) throws Exception {

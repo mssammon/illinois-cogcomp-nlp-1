@@ -29,7 +29,7 @@ public class ExternalAnnotatorServiceFactory {
      * @throws IOException
      * @throws AnnotatorException
      */
-    public static BasicAnnotatorService buildPipeline(Map<String, Annotator> annotators, String cacheDirectory) throws IOException, AnnotatorException {
+    public static CachingAnnotatorService buildPipeline(Map<String, Annotator> annotators, String cacheDirectory) throws IOException, AnnotatorException {
         Properties p = new Properties();
         p.setProperty(AnnotatorServiceConfigurator.CACHE_DIR.key, cacheDirectory);
         ResourceManager emptyConfig = new ResourceManager(p);
@@ -45,7 +45,7 @@ public class ExternalAnnotatorServiceFactory {
      * @throws IOException
      * @throws AnnotatorException
      */
-    public static BasicAnnotatorService buildPipeline(ResourceManager rm, Map<String, Annotator> annotators) throws IOException,
+    public static CachingAnnotatorService buildPipeline(ResourceManager rm, Map<String, Annotator> annotators) throws IOException,
             AnnotatorException {
         // Merges default configuration with the user-specified overrides.
         ResourceManager fullRm = (new ExternalToolsConfigurator()).getConfig(rm);
@@ -56,6 +56,6 @@ public class ExternalAnnotatorServiceFactory {
         TextAnnotationBuilder taBldr =
                 new TokenizerTextAnnotationBuilder(new StatefulTokenizer(splitOnDash));
 
-        return new BasicAnnotatorService(taBldr, annotators, fullRm);
+        return new CachingAnnotatorService(taBldr, annotators, fullRm);
     }
 }

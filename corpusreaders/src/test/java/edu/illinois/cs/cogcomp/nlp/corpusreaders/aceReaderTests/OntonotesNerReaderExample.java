@@ -12,6 +12,7 @@ import edu.illinois.cs.cogcomp.core.datastructures.IntPair;
 import edu.illinois.cs.cogcomp.core.datastructures.ViewNames;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.*;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
+import edu.illinois.cs.cogcomp.core.utilities.SpanInfo;
 import edu.illinois.cs.cogcomp.core.utilities.XmlDocumentProcessor;
 import edu.illinois.cs.cogcomp.nlp.tokenizer.StatefulTokenizer;
 import edu.illinois.cs.cogcomp.nlp.utility.TokenizerTextAnnotationBuilder;
@@ -64,12 +65,12 @@ public class OntonotesNerReaderExample {
         String document = LineIO.slurp(inFile);
         XmlTextAnnotation xta = xtam.createTextAnnotation(document, "OntoNotes 5.0", "test");
         TextAnnotation ta = xta.getTextAnnotation();
-        List<XmlDocumentProcessor.SpanInfo> fudge = xta.getXmlMarkup();
+        List<SpanInfo> fudge = xta.getXmlMarkup();
         System.out.println(ta + "\n");
 
         View nerView = new SpanLabelView(ViewNames.NER_ONTONOTES, ta);
         String cleanText = ta.getText();
-        for (XmlDocumentProcessor.SpanInfo si : fudge) {
+        for (SpanInfo si : fudge) {
             if ("enamex".equalsIgnoreCase(si.label)) {
 
                 IntPair charOffsets = si.spanOffsets;

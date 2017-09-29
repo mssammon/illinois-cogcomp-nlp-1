@@ -14,10 +14,7 @@ import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Where possible, run {@link Annotator} members over one sentence at a time and splice their
@@ -30,7 +27,7 @@ import java.util.Set;
  * 
  * @author mssammon
  */
-public class SentencePipeline extends BasicAnnotatorService {
+public class SentencePipeline extends CachingAnnotatorService {
 
     static private Logger logger = LoggerFactory.getLogger(SentencePipeline.class);
 

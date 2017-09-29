@@ -11,6 +11,7 @@ import edu.illinois.cs.cogcomp.annotation.XmlTextAnnotationMaker;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.XmlTextAnnotation;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
+import edu.illinois.cs.cogcomp.core.utilities.SpanInfo;
 import edu.illinois.cs.cogcomp.core.utilities.StringTransformation;
 import edu.illinois.cs.cogcomp.core.utilities.XmlDocumentProcessor;
 import edu.illinois.cs.cogcomp.nlp.tokenizer.StatefulTokenizer;
@@ -62,11 +63,11 @@ public class XmlTextAnnotationMakerOntonotesTest {
         // read the file and create the annotation.
         XmlTextAnnotation xta = xtam.createTextAnnotation(text, "OntoNotes 5.0", "test");
         TextAnnotation ta = xta.getTextAnnotation();
-        List<XmlDocumentProcessor.SpanInfo> fudge = xta.getXmlMarkup();
+        List<SpanInfo> fudge = xta.getXmlMarkup();
 
         StringTransformation xst = xta.getXmlSt();
 
-        for (XmlDocumentProcessor.SpanInfo si : fudge) {
+        for (SpanInfo si : fudge) {
             int newTextStart = xst.computeModifiedOffsetFromOriginal(si.spanOffsets.getFirst());
             int newTextEnd = xst.computeModifiedOffsetFromOriginal(si.spanOffsets.getSecond());
             String neStr = ta.getText().substring(newTextStart, newTextEnd);

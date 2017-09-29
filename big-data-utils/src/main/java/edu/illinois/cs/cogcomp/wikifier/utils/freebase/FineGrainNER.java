@@ -124,7 +124,7 @@
 //		// // populate(wikiTitle2freebaseMid);
 //		// for(String key:wikiTitle2freebaseMid.keySet())
 //		// System.out.println(wikiTitle2freebaseMid.get(key)+" "+key);
-//		// mydb.close();
+//		// mydb.closeCache();
 ////
 //		getTypeExamples("/people/person");
 //		getTypeExamples("/organization/organization");
@@ -168,7 +168,7 @@
 //			// break;
 //			System.out.println(c++);
 //		}
-//		br.close();
+//		br.closeCache();
 //	}
 //
 //	public static void getTypeExamples(String type) throws IOException,
@@ -211,18 +211,18 @@
 //			catch(ClassCastException e)
 //			{
 //				System.out.println("Finished");
-//				writer.close();
+//				writer.closeCache();
 //				return;
 //			}
 //			catch (Exception e) {
 //				e.printStackTrace();
 //			}
 //			if (count == 100) {
-//				writer.close();
+//				writer.closeCache();
 //				return;
 //			}
 //		}
-//		writer.close();
+//		writer.closeCache();
 //	
 //	}
 //
@@ -255,7 +255,7 @@
 //			} catch (Exception e) {
 //				e.printStackTrace();
 //			}
-//			writer.close();
+//			writer.closeCache();
 //			if (count == 10) {
 //				break;
 //			}
@@ -326,7 +326,7 @@
 //			if (count == 4641)
 //				break;
 //		}
-//		writer.close();
+//		writer.closeCache();
 //		System.out.println("TOTAL COUNT:" + midcount);
 //		System.out.println("BAD FILES");
 //		for (String f : badfiles)

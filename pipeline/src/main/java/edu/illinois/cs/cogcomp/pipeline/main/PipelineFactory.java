@@ -66,7 +66,7 @@ public class PipelineFactory {
      * @throws IOException
      * @throws AnnotatorException
      */
-    public static BasicAnnotatorService buildPipeline(Boolean disableCache, String... views) throws IOException,
+    public static CachingAnnotatorService buildPipeline(Boolean disableCache, String... views) throws IOException,
             AnnotatorException {
         List<String> allViewNames = ViewNames.getAllViewNames();
         Map<String, String> nonDefaultValues = new HashMap<>();
@@ -176,7 +176,7 @@ public class PipelineFactory {
         return new SentencePipeline(taBldr, annotators, fullRm);
     }
 
-    public static BasicAnnotatorService buildPipeline(String... views) throws IOException,
+    public static CachingAnnotatorService buildPipeline(String... views) throws IOException,
             AnnotatorException {
         return buildPipeline(false, views);
     }
@@ -188,7 +188,7 @@ public class PipelineFactory {
      * @throws IOException
      * @throws AnnotatorException
      */
-    public static BasicAnnotatorService buildPipeline() throws IOException, AnnotatorException {
+    public static CachingAnnotatorService buildPipeline() throws IOException, AnnotatorException {
         ResourceManager emptyConfig = new ResourceManager(new Properties());
         return buildPipeline(emptyConfig);
     }
@@ -201,7 +201,7 @@ public class PipelineFactory {
      * @throws IOException
      * @throws AnnotatorException
      */
-    public static BasicAnnotatorService buildPipelineWithAllViews() throws IOException,
+    public static CachingAnnotatorService buildPipelineWithAllViews() throws IOException,
             AnnotatorException {
         return buildPipelineWithAllViews(false);
     }
@@ -214,7 +214,7 @@ public class PipelineFactory {
      * @throws IOException
      * @throws AnnotatorException
      */
-    public static BasicAnnotatorService buildPipelineWithAllViews(Boolean disableCache) throws IOException,
+    public static CachingAnnotatorService buildPipelineWithAllViews(Boolean disableCache) throws IOException,
             AnnotatorException {
         return buildPipeline(disableCache, ViewNames.getAllViewNames().toArray(
                 new String[ViewNames.getAllViewNames().size()]));
@@ -229,7 +229,7 @@ public class PipelineFactory {
      * @throws IOException
      * @throws AnnotatorException
      */
-    public static BasicAnnotatorService buildPipeline(ResourceManager rm) throws IOException,
+    public static CachingAnnotatorService buildPipeline(ResourceManager rm) throws IOException,
             AnnotatorException {
         // Merges default configuration with the user-specified overrides.
         ResourceManager fullRm = (new PipelineConfigurator()).getConfig(new Stanford331Configurator().getConfig(rm));
@@ -250,7 +250,7 @@ public class PipelineFactory {
 
         Map<String, Annotator> annotators = buildAnnotators(fullRm);
         return isSentencePipeline ? new SentencePipeline(taBldr, annotators, fullRm) :
-                new BasicAnnotatorService(taBldr, annotators, fullRm);
+                new CachingAnnotatorService(taBldr, annotators, fullRm);
     }
 
     /**

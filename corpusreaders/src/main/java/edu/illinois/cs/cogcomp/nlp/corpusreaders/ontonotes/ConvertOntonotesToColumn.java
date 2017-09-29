@@ -26,7 +26,7 @@ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.View;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.XmlTextAnnotation;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.core.utilities.XmlDocumentProcessor;
-import edu.illinois.cs.cogcomp.core.utilities.XmlDocumentProcessor.SpanInfo;
+import edu.illinois.cs.cogcomp.core.utilities.SpanInfo;
 import edu.illinois.cs.cogcomp.nlp.corpusreaders.ereReader.CoNLL2002Writer;
 import edu.illinois.cs.cogcomp.nlp.corpusreaders.ontonotes.utils.DocumentIterator;
 import edu.illinois.cs.cogcomp.nlp.corpusreaders.ontonotes.utils.DocumentIterator.Language;
@@ -56,8 +56,8 @@ public class ConvertOntonotesToColumn {
     }
 
     /**
-     * read the file indicated by the argument which is the file name, and path.
-     * @param file the file to read.
+     * read the file indicated by the argument which is the file name, and path.    * 
+     * @param file ontonotes document file.
      * @param document the data read from the file.
      * @return the XmlTextAnnotation containing the text annotation, and xml markup offset data.
      * @throws IOException 

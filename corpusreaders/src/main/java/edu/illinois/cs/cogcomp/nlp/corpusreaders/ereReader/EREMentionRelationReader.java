@@ -54,7 +54,7 @@ public class EREMentionRelationReader extends ERENerReader {
      * @param ereCorpus the ERE corpus release (values from
      * {@link edu.illinois.cs.cogcomp.nlp.corpusreaders.ereReader.EREDocumentReader.EreCorpus}
      * @param throwExceptionOnXmlParseFailure if 'true', throws exception if xml parser encounters e.g. mismatched
-     *                                        open/close tags
+     *                                        open/closeCache tags
      * @throws Exception
      */
     public EREMentionRelationReader(EreCorpus ereCorpus, String corpusRoot, boolean throwExceptionOnXmlParseFailure) throws Exception {
@@ -68,7 +68,7 @@ public class EREMentionRelationReader extends ERENerReader {
          * {@link edu.illinois.cs.cogcomp.nlp.corpusreaders.ereReader.EREDocumentReader.EreCorpus}
          * @param taBuilder TextAnnotationBuilder suited to target corpus (e.g. language other than English)
          * @param throwExceptionOnXmlParseFailure if 'true', throws exception if xml parser encounters e.g. mismatched
-         *                                        open/close tags
+         *                                        open/closeCache tags
          * @throws Exception
          */
     public EREMentionRelationReader(EreCorpus ereCorpus, TextAnnotationBuilder taBuilder, String corpusRoot, boolean throwExceptionOnXmlParseFailure) throws Exception {

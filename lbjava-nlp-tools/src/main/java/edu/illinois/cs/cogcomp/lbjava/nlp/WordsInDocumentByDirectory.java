@@ -142,38 +142,6 @@ public class WordsInDocumentByDirectory implements Parser {
         }
     }
 
-
-    /**
-     * Sets {@link #filesIndex} back to 0.
-     */
-    public void reset() {
-        filesIndex = 0;
-    }
-
-
-    /**
-     * Returns the next labeled array of words.
-     */
-    public Object next() {
-        if (filesIndex == files.size()) return null;
-        File current = files.get(filesIndex++);
-        String label = current.getAbsolutePath();
-        int lastSeparator = label.lastIndexOf(File.separatorChar);
-        label =
-                label.substring(
-                        label.lastIndexOf(File.separatorChar, lastSeparator - 1) + 1,
-                        lastSeparator);
-        return fileToArray(current, label);
-    }
-
-
-    /**
-     * Frees any resources this parser may be holding.
-     */
-    public void close() {
-    }
-
-
     /**
      * Reads in the specified file, splits it on whitespace, and adds all
      * resulting words to an array which it returns.  The specified label
@@ -203,7 +171,6 @@ public class WordsInDocumentByDirectory implements Parser {
         return words.toArray(new String[words.size()]);
     }
 
-
     /**
      * Opens a new input stream reading from the specified file, handling any
      * exception by reporting the error and exiting the program.
@@ -223,7 +190,6 @@ public class WordsInDocumentByDirectory implements Parser {
 
         return in;
     }
-
 
     /**
      * Reads a single line from the specified input stream, handling any
@@ -248,7 +214,6 @@ public class WordsInDocumentByDirectory implements Parser {
         return line;
     }
 
-
     /**
      * Closes the specified input stream, handling any exception by reporting
      * the error and exiting the program.
@@ -261,9 +226,37 @@ public class WordsInDocumentByDirectory implements Parser {
         try {
             in.close();
         } catch (Exception e) {
-            System.err.println("Can't close input file '" + inputFile + "': " + e);
+            System.err.println("Can't closeCache input file '" + inputFile + "': " + e);
             System.exit(1);
         }
+    }
+
+    /**
+     * Sets {@link #filesIndex} back to 0.
+     */
+    public void reset() {
+        filesIndex = 0;
+    }
+
+    /**
+     * Returns the next labeled array of words.
+     */
+    public Object next() {
+        if (filesIndex == files.size()) return null;
+        File current = files.get(filesIndex++);
+        String label = current.getAbsolutePath();
+        int lastSeparator = label.lastIndexOf(File.separatorChar);
+        label =
+                label.substring(
+                        label.lastIndexOf(File.separatorChar, lastSeparator - 1) + 1,
+                        lastSeparator);
+        return fileToArray(current, label);
+    }
+
+    /**
+     * Frees any resources this parser may be holding.
+     */
+    public void close() {
     }
 }
 

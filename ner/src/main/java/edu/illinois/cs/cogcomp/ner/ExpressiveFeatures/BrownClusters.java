@@ -31,17 +31,23 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 public class BrownClusters {
-    private static Logger logger = LoggerFactory.getLogger(BrownClusters.class);
-
-    /** the sole instance of this class. */
-    private static BrownClusters brownclusters = null;
-
     /** used to synchronize initialization. */
     static private final String INIT_SYNC = "Brown Cluster Initialization Synchronization Token";
-    
+    private static Logger logger = LoggerFactory.getLogger(BrownClusters.class);
+    /** the sole instance of this class. */
+    private static BrownClusters brownclusters = null;
+    private final int[] prefixLengths = {4, 6, 10, 20};
+    private boolean[] isLowercaseBrownClustersByResource = null;
+    private ArrayList<String> resources = null;
+    private ArrayList<THashMap<String, String>> wordToPathByResource = null;
+    /** ensures singleton-ness. */
+    private BrownClusters() {
+
+    }
+
     /**
      * This method should never be called before init, or the gazetteer will not be initialized.
-     * 
+     *
      * @return the singleton instance of the Gazetteers class.
      */
     static public BrownClusters get() {
@@ -54,16 +60,6 @@ public class BrownClusters {
         brownclusters = bc;
     }
 
-    /** ensures singleton-ness. */
-    private BrownClusters() {
-
-    }
-
-    private boolean[] isLowercaseBrownClustersByResource = null;
-    private ArrayList<String> resources = null;
-    private ArrayList<THashMap<String, String>> wordToPathByResource = null;
-    private final int[] prefixLengths = {4, 6, 10, 20};
-
     /**
      * Initialze the brown cluster data. This is a singleton, so this process is sychronized and
      * atomic with resprect to the <code>get()</code> method above.
@@ -72,20 +68,12 @@ public class BrownClusters {
      * @param isLowercaseBrownClusters
      */
     public static void init(Vector<String> pathsToClusterFiles, Vector<Integer> thresholds,
-            Vector<Boolean> isLowercaseBrownClusters, String localPath) throws FileNotFoundException, InvalidPortException, InvalidEndpointException, DatastoreException {
+            Vector<Boolean> isLowercaseBrownClusters) {
 
         try {
-            File gazDirectory = null;
+        Datastore dsNoCredentials = new Datastore(new ResourceConfigurator().getDefaultConfig());
+        File bcDirectory = dsNoCredentials.getDirectory("org.cogcomp.brown-clusters", "brown-clusters", 1.5, false);
 
-            if ("1" == localPath) {
-                Datastore dsNoCredentials = new Datastore(new ResourceConfigurator().getDefaultConfig());
-                gazDirectory = dsNoCredentials.getDirectory("org.cogcomp.brown-clusters", "brown-clusters", 1.5, false);
-                logger.warn("Reading brown clusters from datastore: {}", localPath);
-            }
-            else {
-                gazDirectory = new File(localPath);
-                logger.warn("Reading brown clusters from local path: {}", localPath);
-            }
         synchronized (INIT_SYNC) {
             brownclusters = new BrownClusters();
             brownclusters.isLowercaseBrownClustersByResource =
@@ -96,7 +84,7 @@ public class BrownClusters {
                 THashMap<String, String> h = new THashMap<>();
                 // We used to access the files as resources. Now we are accessing them programmatically.
                 // InFile in = new InFile(ResourceUtilities.loadResource(pathsToClusterFiles.elementAt(i)));
-                InputStream is = new FileInputStream(gazDirectory.getPath() + File.separator + pathsToClusterFiles.elementAt(i));
+                InputStream is = new FileInputStream(bcDirectory.getPath() + File.separator + pathsToClusterFiles.elementAt(i));
                 InFile in = new InFile(is);
                 String line = in.readLine();
                 int wordsAdded = 0;
@@ -124,8 +112,30 @@ public class BrownClusters {
         }
         } catch (InvalidPortException | InvalidEndpointException | DatastoreException | FileNotFoundException e) {
             e.printStackTrace();
-            throw e;
         }
+    }
+
+    private static void printArr(String[] arr) {
+        for (String anArr : arr)
+            logger.info(" " + anArr);
+        logger.info("");
+    }
+
+    public static void main(String[] args) {
+        /*
+         * Vector<String> resources=new Vector<>();
+         * resources.addElement("Data/BrownHierarchicalWordClusters/brownBllipClusters");
+         * Vector<Integer> thres=new Vector<>(); thres.addElement(5); Vector<Boolean> lowercase=new
+         * Vector<>(); lowercase.addElement(false); init(resources,thres,lowercase);
+         * logger.info("finance "); printArr(getPrefixes(new NEWord(new
+         * Word("finance"),null,null))); logger.info("help"); printArr(getPrefixes(new
+         * NEWord(new Word("help"),null,null))); logger.info("resque ");
+         * printArr(getPrefixes(new NEWord(new Word("resque"),null,null)));
+         * logger.info("assist "); printArr(getPrefixes(new NEWord(new
+         * Word("assist"),null,null))); logger.info("assistance "); printArr(getPrefixes(new
+         * NEWord(new Word("assistance"),null,null))); logger.info("guidance ");
+         * printArr(getPrefixes(new NEWord(new Word("guidance"),null,null)));
+         */
     }
 
     /**
@@ -160,10 +170,13 @@ public class BrownClusters {
         return res;
     }
 
-    private static void printArr(String[] arr) {
-        for (String anArr : arr)
-            logger.info(" " + anArr);
-        logger.info("");
+    final public String getPrefixesCombined(String word){
+        String[] cl = getPrefixes(word);
+        String ret = "";
+        for (String s : cl){
+            ret += s + ",";
+        }
+        return ret;
     }
 
     final public void printOovData(Data data) {
@@ -203,22 +216,4 @@ public class BrownClusters {
         }
 
     }
-
-    public static void main(String[] args) {
-        /*
-         * Vector<String> resources=new Vector<>();
-         * resources.addElement("Data/BrownHierarchicalWordClusters/brownBllipClusters");
-         * Vector<Integer> thres=new Vector<>(); thres.addElement(5); Vector<Boolean> lowercase=new
-         * Vector<>(); lowercase.addElement(false); init(resources,thres,lowercase);
-         * logger.info("finance "); printArr(getPrefixes(new NEWord(new
-         * Word("finance"),null,null))); logger.info("help"); printArr(getPrefixes(new
-         * NEWord(new Word("help"),null,null))); logger.info("resque ");
-         * printArr(getPrefixes(new NEWord(new Word("resque"),null,null)));
-         * logger.info("assist "); printArr(getPrefixes(new NEWord(new
-         * Word("assist"),null,null))); logger.info("assistance "); printArr(getPrefixes(new
-         * NEWord(new Word("assistance"),null,null))); logger.info("guidance ");
-         * printArr(getPrefixes(new NEWord(new Word("guidance"),null,null)));
-         */
-    }
-
 }

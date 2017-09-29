@@ -35,7 +35,7 @@ public class TextAnnotationMapDBHandlerTest {
 
     @After
     public void tearDown() throws Exception {
-        mapDBHandler.close();
+        mapDBHandler.closeCache();
         IOUtils.rm(dbFile);
     }
 

@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DBHelper {
-    private static Logger logger = LoggerFactory.getLogger(DBHelper.class);
-
     private static final String sqlDriver = "org.h2.Driver";
+    private final static Map<String, Connection> connections = new HashMap<>();
+    private static Logger logger = LoggerFactory.getLogger(DBHelper.class);
 
     static {
         try {
@@ -31,8 +31,6 @@ public class DBHelper {
             System.exit(-1);
         }
     }
-
-    private final static Map<String, Connection> connections = new HashMap<>();
 
     public static void createTable(String dbFile, String tableName, String tableDefinition)
             throws SQLException {
@@ -64,11 +62,14 @@ public class DBHelper {
         return "jdbc:h2:" + dbFile + ";MODE=MySQL;FILE_LOCK=NO";
     }
 
-    private static void checkConnection(String dbFile) {
+    protected static void checkConnection(String dbFile) {
         try {
             Connection connection = connections.get(dbFile);
 
-            if (connection.isClosed())
+            if (null == connection) {
+                logger.error("no connection for file '{}'.", dbFile);
+            }
+            else if (connection.isClosed())
                 initializeConnection(dbFile);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -85,5 +86,9 @@ public class DBHelper {
     public static Connection getConnection(String dbFile) {
         checkConnection(dbFile);
         return connections.get(dbFile);
+    }
+
+    public static void closeConnection(String dbFile) {
+        logger.info("Not implemented (not necessary?) for this class.");
     }
 }

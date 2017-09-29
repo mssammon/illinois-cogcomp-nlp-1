@@ -12,12 +12,26 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class TreeParser<S> {
+    // See
+    // http://stackoverflow.com/questions/2206378/how-to-split-a-string-but-also-keep-the-delimiters
+    private final static String WITH_DELIMITER = "((?<=%1$s)|(?=%1$s))";
+    private final static Pattern regex = Pattern.compile(String.format(WITH_DELIMITER,
+            "[\\s\\(\\)]"));
     private INodeReader<S> nodeParser;
     private List<String> tokens;
     private int currentTokenId;
 
     public TreeParser(INodeReader<S> nodeParser) {
         this.nodeParser = nodeParser;
+    }
+
+    public static Tree<String> parseStringTree(String treeString) {
+        return new TreeParser<>(new INodeReader<String>() {
+
+            public String parseNode(String string) {
+                return string;
+            }
+        }).parse(treeString);
     }
 
     public Tree<S> parse(String treeString) {
@@ -54,7 +68,7 @@ public class TreeParser<S> {
 
                 return tree;
             } else {
-                throw new IllegalArgumentException("Missing close parenthesis near " + currentToken);
+                throw new IllegalArgumentException("Missing closeCache parenthesis near " + currentToken);
             }
 
         } else {
@@ -68,7 +82,7 @@ public class TreeParser<S> {
     private Tree<S> parseSequence(Tree<S> currentTree) {
 
         // at this point, i have already seen at least an open parenthesis AND
-        // an atom. If the next character is a character is a close parenthesis,
+        // an atom. If the next character is a character is a closeCache parenthesis,
         // then I just return the input. NOTE: DO NOT MOVE THE TOKEN POINTER.
 
         String currentToken = tokens.get(currentTokenId);
@@ -86,13 +100,6 @@ public class TreeParser<S> {
 
     }
 
-    // See
-    // http://stackoverflow.com/questions/2206378/how-to-split-a-string-but-also-keep-the-delimiters
-    private final static String WITH_DELIMITER = "((?<=%1$s)|(?=%1$s))";
-
-    private final static Pattern regex = Pattern.compile(String.format(WITH_DELIMITER,
-            "[\\s\\(\\)]"));
-
     private List<String> tokenize(String treeString) {
 
         String[] tok1 = regex.split(treeString);
@@ -105,15 +112,6 @@ public class TreeParser<S> {
         }
 
         return toks;
-    }
-
-    public static Tree<String> parseStringTree(String treeString) {
-        return new TreeParser<>(new INodeReader<String>() {
-
-            public String parseNode(String string) {
-                return string;
-            }
-        }).parse(treeString);
     }
 
 }
