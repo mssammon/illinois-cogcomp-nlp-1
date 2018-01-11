@@ -45,7 +45,7 @@ public class MainClass {
 
     public static void main(String args[]) throws Exception {
         ArgumentParser parser = ArgumentParsers.newArgumentParser("MainClass", true);
-        parser.addArgument("-r", "--train").type(String.class)
+        parser.addArgument("-r", "--tune").type(String.class)
                 .help("The training file in CoNLL format").setDefault("");
         parser.addArgument("-t", "--test").help("The test file in CoNLL format");
         parser.addArgument("-c", "--config").help("The SL configuration file")
@@ -54,7 +54,7 @@ public class MainClass {
         parser.addArgument("-p", "--pos").help("The type of PoS tags to use")
                 .choices("gold", "auto").setDefault("auto");
         parser.addArgument("-o", "--offset").type(Integer.class)
-                .help("The offset of the pos/head/dep index for the CoNLL train/test files")
+                .help("The offset of the pos/head/dep index for the CoNLL tune/test files")
                 .setDefault(0);
         parser.addArgument("-a", "--annotate")
                 .type(String.class)
@@ -65,11 +65,11 @@ public class MainClass {
         useGoldPOS = ns.getString("pos").equals("gold");
         logger.info("Using {} PoS tags", ns.getString("pos"));
         conllIndexOffset = ns.getInt("offset");
-        if (!ns.getString("train").isEmpty()) {
+        if (!ns.getString("tune").isEmpty()) {
             logger.info("Using {} configuration", ns.getString("config"));
-            train(ns.getString("train"), ns.getString("config"), ns.getString("model"));
+            train(ns.getString("tune"), ns.getString("config"), ns.getString("model"));
             logger.info("Testing on Training Data");
-            test(ns.getString("model"), ns.getString("train"), false);
+            test(ns.getString("model"), ns.getString("tune"), false);
         }
         if (!ns.getString("test").isEmpty()) {
             logger.info("Testing on Test Data");

@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * accuracy, ideally could break down into much more fine grained reports like that of the
  * TestDiscrete class.
  *
- * Simply tests existing models: Does NOT train/build models, see POSTrain for training.
+ * Simply tests existing models: Does NOT tune/build models, see POSTrain for training.
  *
  * @author James Chen
  */

@@ -223,7 +223,7 @@ public class Quantifier extends Annotator {
         QuantitiesClassifier classifier =
                 new QuantitiesClassifier(modelName + ".lc", modelName + ".lex");
         QuantitiesDataReader trainReader =
-                new QuantitiesDataReader(dataDir + "/allData.txt", "train");
+                new QuantitiesDataReader(dataDir + "/allData.txt", "tune");
         BatchTrainer trainer = new BatchTrainer(classifier, trainReader);
         trainer.train(45);
         classifier.save();
@@ -233,7 +233,7 @@ public class Quantifier extends Annotator {
         QuantitiesClassifier classifier =
                 new QuantitiesClassifier(modelName + ".lc", modelName + ".lex");
         QuantitiesDataReader trainReader =
-                new QuantitiesDataReader(dataDir + "/train.txt", "train");
+                new QuantitiesDataReader(dataDir + "/tune.txt", "tune");
         BatchTrainer trainer = new BatchTrainer(classifier, trainReader);
         trainer.train(45);
         classifier.save();

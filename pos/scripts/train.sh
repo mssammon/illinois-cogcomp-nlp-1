@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #####
-# train pos tagger using default paths.
+# tune pos tagger using default paths.
 # Due to LBJava quirks when generating code, the simplest
 #   way to specify alternative model path is to change 
 #   the value(s) in the POSConfigurator class.

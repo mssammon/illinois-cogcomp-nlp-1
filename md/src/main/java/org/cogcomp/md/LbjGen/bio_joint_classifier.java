@@ -29,7 +29,7 @@ public class bio_joint_classifier extends SupportVectorMachine
     if (instance == null) instance = new bio_joint_classifier(true);
   }
 
-  public static Parser getParser() { return new BIOReader("data/partition_with_dev/train/0", "ACE05", "ALL", true); }
+  public static Parser getParser() { return new BIOReader("data/partition_with_dev/tune/0", "ACE05", "ALL", true); }
   public static Parser getTestParser() { return new BIOReader("data/partition_with_dev/eval/0", "ACE05", "ALL", true); }
 
   public static boolean isTraining;

@@ -42,7 +42,7 @@ import java.util.*;
  * @author Christos Christodoulopoulos
  */
 public class PrepSRLDataReader extends DataReader {
-    private static final String semevalTrainDataDirectory = "train/xml";
+    private static final String semevalTrainDataDirectory = "tune/xml";
     private static final String semevalTestDataDirectory = "test/xml";
     private static final String semevalKeyDirectory = "Answers";
     private static final Set<String> prepositions = new HashSet<>(Arrays.asList("about", "above",
@@ -186,7 +186,7 @@ public class PrepSRLDataReader extends DataReader {
         List<TextAnnotation> textAnnotations = new ArrayList<>();
         String dataDir = file + File.separator;
         dataDir +=
-                (corpusName.equals("train") ? semevalTrainDataDirectory : semevalTestDataDirectory);
+                (corpusName.equals("tune") ? semevalTrainDataDirectory : semevalTestDataDirectory);
         for (String currentFile : getFiles(dataDir)) {
             NodeList instanceNodeList;
             try {

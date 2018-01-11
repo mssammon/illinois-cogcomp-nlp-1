@@ -29,7 +29,7 @@ public class Main {
         if (!IOUtils.exists(modelsDir))
             IOUtils.mkdir(modelsDir);
         Learner classifier = new PrepSRLClassifier(modelName + ".lc", modelName + ".lex");
-        Parser trainDataReader = new PrepSRLDataReader(dataDir, "train");
+        Parser trainDataReader = new PrepSRLDataReader(dataDir, "tune");
         BatchTrainer trainer = new BatchTrainer(classifier, trainDataReader, 1000);
         trainer.train(20);
         classifier.save();

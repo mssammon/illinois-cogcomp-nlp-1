@@ -19,9 +19,12 @@ import java.io.IOException;
  * @author Nick Rizzolo
  **/
 public class POSConfigurator extends Configurator {
-    /** A configurable prefix. */
+    /** A configurable prefix. This MUST be set by user when training/evaluating POS tagger -- point
+     *  it to the directory containing the corpus in paren format.*/
     public static final Property CORPUS_PREFIX = new Property("corpusPrefix",
-            "/shared/corpora/corporaWeb/written/eng/POS/");
+            "/shared/corpora/corporaWeb/written/eng/POS_HYPHEN_SPLIT/");
+//            "/shared/experiments/mssammon/workspace-github/cogcomp-nlp/pos/corpus-paren-format/");
+
     /** The file containing the training set. */
     public static final Property TRAINING_DATA = new Property("trainingData", CORPUS_PREFIX.value
             + "00-18.br");
@@ -58,6 +61,15 @@ public class POSConfigurator extends Configurator {
             MODEL_PATH.value + UNKNOWN_NAME.value + ".lc");
     public static final Property UNKNOWN_LEX_PATH = new Property("unknownLexPath", MODEL_PATH.value
             + UNKNOWN_NAME.value + ".lex");
+    public static final Property NUM_FOLDS = new Property("numFolds", "5");
+    public static final Property IS_TRAIN_SPLIT_RANDOM = new Property("isTrainSplitRandom", "true");
+    /** what statistic to use when tuning classifier performance: ACC or F1 */
+    public static final Property OPT_TARGET_STAT = new Property("performanceTargetStat", "ACC");
+    public static final Property THICKNESS_PARAMS = new Property("thicknessParams", "2,4,8,16,32");
+    public static final Property LEARNING_RATE_PARAMS = new Property("learningRateParams", "0.05,0.1,0.2,0.4");
+    /** after tuning, whether to evaluate on test data as well as on training data */
+    public static final Property EVAL_ON_TEST = new Property("evaluateOnTestData", "false");
+
 
     @Override
     public ResourceManager getDefaultConfig() {
@@ -65,7 +77,10 @@ public class POSConfigurator extends Configurator {
                 {CORPUS_PREFIX, TRAINING_DATA, DEV_DATA, TEST_DATA, TRAINING_AND_DEV_DATA,
                         BASELINE_NAME, MIKHEEV_NAME, KNOWN_NAME, UNKNOWN_NAME, MODEL_PATH,
                         BASELINE_MODEL_PATH, MIKHEEV_MODEL_PATH, KNOWN_MODEL_PATH, KNOWN_LEX_PATH,
-                        UNKNOWN_MODEL_PATH, UNKNOWN_LEX_PATH, BASELINE_LEX_PATH, MIKHEEV_LEX_PATH};
+                        UNKNOWN_MODEL_PATH, UNKNOWN_LEX_PATH, BASELINE_LEX_PATH, MIKHEEV_LEX_PATH,
+                        NUM_FOLDS, IS_TRAIN_SPLIT_RANDOM, OPT_TARGET_STAT, THICKNESS_PARAMS,
+                        LEARNING_RATE_PARAMS, EVAL_ON_TEST
+                };
         return new ResourceManager(generateProperties(props));
     }
 

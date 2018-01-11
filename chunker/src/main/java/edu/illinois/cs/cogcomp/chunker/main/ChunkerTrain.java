@@ -113,7 +113,7 @@ public class ChunkerTrain {
             cnt++;
         }
         parser.reset();
-        // Get the boundary between train and dev
+        // Get the boundary between tune and dev
         long idx = Math.round(cnt*(1-dev_ratio));
         if( idx < 0 )
             idx = 0;

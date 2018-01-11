@@ -61,7 +61,7 @@ public class IOHelper {
      */
     public static void produceReaders(){
         for (int i = 0; i < 5; i++){
-            ACEMentionReader curTrain = new ACEMentionReader("data/partition_with_dev/train/" + i, "relations_mono");
+            ACEMentionReader curTrain = new ACEMentionReader("data/partition_with_dev/tune/" + i, "relations_mono");
             serializeDataOut(curTrain, "relation-extraction/preprocess/reader/train_fold_" + i);
             ACEMentionReader curTest = new ACEMentionReader("data/partition_with_dev/eval/" + i, "relations_mono");
             serializeDataOut(curTest, "relation-extraction/preprocess/reader/test_fold_" + i);

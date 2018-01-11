@@ -44,14 +44,14 @@ public class BIOTester {
 
     /**
      * Returns the corpus data paths.
-     * @param mode "train/eval/all/dev"
+     * @param mode "tune/eval/all/dev"
      * @param corpus "ACE/ERE"
      * @param fold The fold index. Not used in mode "all/dev"
      */
     public static String getPath(String mode, String corpus, int fold){
         if (corpus.equals("ERE")) {
-            if (mode.equals("train")) {
-                return "data/ere/cv/train/" + fold;
+            if (mode.equals("tune")) {
+                return "data/ere/cv/tune/" + fold;
             }
             else if (mode.equals("eval")) {
                 return "data/ere/cv/eval/" + fold;
@@ -64,8 +64,8 @@ public class BIOTester {
             }
         }
         else if (corpus.equals("ACE")){
-            if (mode.equals("train")) {
-                return "data/partition_with_dev/train/" + fold;
+            if (mode.equals("tune")) {
+                return "data/partition_with_dev/tune/" + fold;
             }
             else if (mode.equals("eval")) {
                 return "data/partition_with_dev/eval/" + fold;

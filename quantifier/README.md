@@ -115,7 +115,7 @@ of sentences, indicating the span of text. The valid tags are as follows :
 
 #### 3.3.2 Training on new data
 
-You will need to generate the data in CoNLL format (same as `data/train.txt`). 
+You will need to generate the data in CoNLL format (same as `data/tune.txt`). 
 Add the location in `src/main/java/edu/illinois/cs/cogcomp/quant/lbj/Constants.java`, and recompile.
 
 

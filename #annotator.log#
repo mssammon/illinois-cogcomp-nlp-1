@@ -1,0 +1,1319 @@
+commit f31d410a9dba705e5cc3b7eef8e45cbec8f05f57
+Author: Mark Sammons <mssammon@illinois.edu>
+Date:   Fri Sep 29 13:06:55 2017 -0500
+
+    made SpanInfo its own class
+    made SpanInfo and StringTransformation serializable
+    made explicit openCache and closeCache methods for cache handlers
+    fixed bug in textcleaner in normalizeToEncoding where implicit cast to Character caused exceptions
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index adc16d28..33376f09 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -204,19 +204,7 @@ public abstract class Annotator {
+     }
+ 
+     /**
+-     * Same lazy view function, but with resource parameters
+-     * First, checks whether model is initialized, and calls initialize() if not. Then, calls
+-     * addView(). IMPORTANT: clients should always call getView().
+-     */
+-    private void lazyAddView(TextAnnotation ta, ResourceManager runtimeAttributes) throws AnnotatorException {
+-        if (!isInitialized()) {
+-            doInitialize();
+-        }
+-        addView(ta, runtimeAttributes);
+-    }
+-
+-    /**
+-     * Can be used internally by {@link BasicAnnotatorService} to check for pre-requisites before
++     * Can be used internally by {@link CachingAnnotatorService} to check for pre-requisites before
+      * calling any single (external) {@link Annotator}.
+      *
+      * @return The list of {@link edu.illinois.cs.cogcomp.core.datastructures.ViewNames} required by
+
+commit 
+Author: khashab2 <khashab2@illinois.edu>
+Date:   Thu Oct 26 01:00:31 2017 -0400
+
+    add functions to addViews in AnnotatorService.
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index 1e89c282..adc16d28 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -168,11 +168,23 @@ public abstract class Annotator {
+         return ta.getView(viewName);
+     }
+ 
++    /**
++     * Add the view named by getViewName() to the TextAnnotation argument, and return the View
++     *
++     * @param ta
++     * @return the newly created View.
++     * @throws AnnotatorException
++     */
++    public final View getView(TextAnnotation ta, ResourceManager runtimeAttributes) throws AnnotatorException {
++        lazyAddView(ta, runtimeAttributes);
++        return ta.getView(viewName);
++    }
++
+     /**
+      Add the content of the annotators to a given TextAnnotation object.
+      @param runtimeAttributes the parameters that might change the behavior of the annotator while after initialization and while running.
+      */
+-    protected void addView(TextAnnotation ta,  ResourceManager runtimeAttributes) throws AnnotatorException {
++    protected void addView(TextAnnotation ta, ResourceManager runtimeAttributes) throws AnnotatorException {
+         logger.warn("This annotator does not accept run-time attributes. You have to run `addView() function without the attributes parameter. `");
+         addView(ta);
+     }
+@@ -191,6 +203,18 @@ public abstract class Annotator {
+         addView(ta);
+     }
+ 
++    /**
++     * Same lazy view function, but with resource parameters
++     * First, checks whether model is initialized, and calls initialize() if not. Then, calls
++     * addView(). IMPORTANT: clients should always call getView().
++     */
++    private void lazyAddView(TextAnnotation ta, ResourceManager runtimeAttributes) throws AnnotatorException {
++        if (!isInitialized()) {
++            doInitialize();
++        }
++        addView(ta, runtimeAttributes);
++    }
++
+     /**
+      * Can be used internally by {@link BasicAnnotatorService} to check for pre-requisites before
+      * calling any single (external) {@link Annotator}.
+
+commit 0c3db2de6b25326910f80f5f82c1b5a51c00a176
+Author: khashab2 <khashab2@illinois.edu>
+Date:   Sat Oct 21 16:58:12 2017 -0400
+
+    adding an addView function to Annotator, with extra parameter.
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index d9ab1704..1e89c282 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -168,6 +168,15 @@ public abstract class Annotator {
+         return ta.getView(viewName);
+     }
+ 
++    /**
++     Add the content of the annotators to a given TextAnnotation object.
++     @param runtimeAttributes the parameters that might change the behavior of the annotator while after initialization and while running.
++     */
++    protected void addView(TextAnnotation ta,  ResourceManager runtimeAttributes) throws AnnotatorException {
++        logger.warn("This annotator does not accept run-time attributes. You have to run `addView() function without the attributes parameter. `");
++        addView(ta);
++    }
++
+     /**
+      * First, checks whether model is initialized, and calls initialize() if not. Then, calls
+      * addView(). IMPORTANT: clients should always call getView().
+@@ -182,7 +191,6 @@ public abstract class Annotator {
+         addView(ta);
+     }
+ 
+-
+     /**
+      * Can be used internally by {@link BasicAnnotatorService} to check for pre-requisites before
+      * calling any single (external) {@link Annotator}.
+
+commit fdb9f3fd8b964f13ea0367a74d25323dc11cbbd4
+Author: Stephen Mayhew <swm.mayhew@gmail.com>
+Date:   Thu Oct 5 12:18:53 2017 -0400
+
+    updated transliterationannotator
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index 162f0ad6..d9ab1704 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -115,7 +115,7 @@ public abstract class Annotator {
+      * 
+      * @param rm configuration parameters
+      */
+-    public abstract void initialize(ResourceManager rm) throws IOException;
++    public abstract void initialize(ResourceManager rm);
+ 
+ 
+     /**
+
+commit 1cca1c5d9d2c7bf02c1624fa75a180c5282f2096
+Author: Stephen Mayhew <swm.mayhew@gmail.com>
+Date:   Thu Oct 5 11:47:27 2017 -0400
+
+    Added annotator
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index ca7a4352..162f0ad6 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -14,6 +14,7 @@ import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ 
++import java.io.IOException;
+ import java.util.Properties;
+ import java.util.Set;
+ 
+@@ -114,7 +115,7 @@ public abstract class Annotator {
+      * 
+      * @param rm configuration parameters
+      */
+-    public abstract void initialize(ResourceManager rm);
++    public abstract void initialize(ResourceManager rm) throws IOException;
+ 
+ 
+     /**
+
+commit b7a5d0a8df4b02d6495f333109faff0eb7eda0d7
+Author: Mark Sammons <mssammon@illinois.edu>
+Date:   Tue Feb 28 11:56:27 2017 -0600
+
+    update Constituent code to correctly clone (labelsToScores was not handled previously)
+    update TextAnnotationUtilities code to allow annotations to be mapped from a sentence (or other text span) to a longer text containing that span
+    update Pipeline to allow sentence-by-sentence annotation (goal: avoid whole-document failures because one sentence is bad -- may need to change which exceptions get thrown by annotators such as stanford dependency)
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index d5dc1b21..ca7a4352 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -37,7 +37,7 @@ public abstract class Annotator {
+      * stores configuration for lazy initialization.
+      */
+     protected ResourceManager config;
+-    private boolean isSentenceLevel;
++    private boolean isSentenceLevel;  // default is TRUE
+ 
+ 
+     /**
+@@ -99,7 +99,7 @@ public abstract class Annotator {
+         this.viewName = viewName;
+         this.requiredViews = requiredViews;
+         this.config = config;
+-        isSentenceLevel = false;
++        isSentenceLevel = true;
+         isInitialized = false;
+         if (!isLazilyInitialized)
+             doInitialize();
+
+commit 2f906842cbe234ae715cdf36c89af984e77d92b8
+Author: Mark Sammons <mssammon@illinois.edu>
+Date:   Thu Feb 23 14:07:41 2017 -0600
+
+    update Constituent code to correctly clone (labelsToScores was not handled previously)
+    update TextAnnotationUtilities code to allow annotations to be mapped from a sentence (or other text span) to a longer text containing that span
+    update Pipeline to allow sentence-by-sentence annotation (avoid whole-document failures because one sentence is bad)
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index cc10d5b9..d5dc1b21 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -37,6 +37,7 @@ public abstract class Annotator {
+      * stores configuration for lazy initialization.
+      */
+     protected ResourceManager config;
++    private boolean isSentenceLevel;
+ 
+ 
+     /**
+@@ -98,6 +99,7 @@ public abstract class Annotator {
+         this.viewName = viewName;
+         this.requiredViews = requiredViews;
+         this.config = config;
++        isSentenceLevel = false;
+         isInitialized = false;
+         if (!isLazilyInitialized)
+             doInitialize();
+@@ -202,4 +204,7 @@ public abstract class Annotator {
+     }
+ 
+ 
++    public boolean isSentenceLevel() {
++        return isSentenceLevel;
++    }
+ }
+
+commit c23fc2021e5b68608d98ea47143c4ef49569be9b
+Author: Mark Sammons <mssammon@illinois.edu>
+Date:   Tue Nov 8 15:13:27 2016 -0600
+
+    Updated core-utilities README to explain the Annotator class, including lazy initialization.  Added similarity API in its own module (no tests, as it is very basic).
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index cc3c20eb..44c320aa 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -34,7 +34,7 @@ public abstract class Annotator {
+     /**
+      * stores configuration for lazy initialization.
+      */
+-    protected ResourceManager nonDefaultRm;
++    protected ResourceManager config;
+ 
+ 
+     /**
+@@ -88,14 +88,14 @@ public abstract class Annotator {
+      * @param requiredViews The views that must be populated for this new view to be created.
+      * @param isLazilyInitialized if 'true', defers the initialization of the derived class until
+      *        getView() is called.
+-     * @param nonDefaultRm these properties are stored for use by derived class, esp. in
++     * @param config these properties are stored for use by derived class, esp. in
+      *        initialize()
+      */
+     public Annotator(String viewName, String[] requiredViews, boolean isLazilyInitialized,
+-            ResourceManager nonDefaultRm) {
++            ResourceManager config) {
+         this.viewName = viewName;
+         this.requiredViews = requiredViews;
+-        this.nonDefaultRm = nonDefaultRm;
++        this.config = config;
+         isInitialized = false;
+         if (!isLazilyInitialized)
+             doInitialize();
+@@ -118,7 +118,7 @@ public abstract class Annotator {
+      * Default implementation just sets the relevant field to 'true'.
+      */
+     final public void doInitialize() {
+-        initialize(nonDefaultRm);
++        initialize(config);
+         isInitialized = true;
+     }
+ 
+
+commit ea0ceb933950cf7b4c1084e74dd7e6d377378a51
+Author: Mark Sammons <mssammon@illinois.edu>
+Date:   Mon Sep 19 13:06:17 2016 -0500
+
+    update in-class documenation; update test input
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index 7ae69164..cc3c20eb 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -16,7 +16,7 @@ import java.util.Properties;
+ import java.util.Set;
+ 
+ /**
+- * An interface for creating views of a specified name from a {@link TextAnnotation}
++ * An interface for creating views of a specified name from a {@link TextAnnotation}. Supports lazy initialization.
+  * IMPORTANT FOR DERIVED CLASSES: if you initialize fields at declaration rather than in the constructor,
+  *     those assignments take place AFTER the super.constructor has run -- so e.g. you cannot
+  *     use a Logger you declare in this way to log messages in the initialize() method that
+
+commit d4ac847890d68b543f6c43f0e2c9db1ff0e9c24c
+Author: zfeng6 <zfeng6@illinois.edu>
+Date:   Sun Oct 23 16:21:23 2016 -0500
+
+    modify given comments
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index 7ae69164..5d3ef07d 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -11,6 +11,8 @@ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation
+ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.View;
+ import edu.illinois.cs.cogcomp.core.utilities.configuration.Configurator;
+ import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
++import org.slf4j.Logger;
++import org.slf4j.LoggerFactory;
+ 
+ import java.util.Properties;
+ import java.util.Set;
+@@ -25,7 +27,7 @@ import java.util.Set;
+  * @author Vivek Srikumar, Mark Sammons, Christos Christodoulopoulos
+  */
+ public abstract class Annotator {
+-
++    private static Logger logger = LoggerFactory.getLogger(Annotator.class);
+ 
+     protected String viewName;
+     protected String[] requiredViews;
+@@ -195,7 +197,7 @@ public abstract class Annotator {
+      * @return the set of string representing the tag values
+      */
+     public Set<String> getTagValues() {
+-        System.err.println("Not yet implemented.");
++        logger.error("Not yet implemented.");
+         return null;
+     }
+ 
+
+commit 85f3620779bd6cfd0d1ec4c54f6aed6977c95d26
+Author: Yewen Fan <tofuwen@users.noreply.github.com>
+Date:   Tue Oct 4 22:31:08 2016 -0500
+
+    adding get_tag in POSAnnotator (#235)
+    
+    * adding get_tag in POSAnnotator
+    
+    * better way to get tags
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index a6cb0386..7ae69164 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -13,6 +13,7 @@ import edu.illinois.cs.cogcomp.core.utilities.configuration.Configurator;
+ import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
+ 
+ import java.util.Properties;
++import java.util.Set;
+ 
+ /**
+  * An interface for creating views of a specified name from a {@link TextAnnotation}
+@@ -188,5 +189,15 @@ public abstract class Annotator {
+         return requiredViews;
+     }
+ 
++    /**
++     * Return possible tag values that the annotator can produce.
++     *
++     * @return the set of string representing the tag values
++     */
++    public Set<String> getTagValues() {
++        System.err.println("Not yet implemented.");
++        return null;
++    }
++
+ 
+ }
+
+commit 371761bf453d5f78edc1400e044f65381ae6b479
+Author: Mark Sammons <mssammon@illinois.edu>
+Date:   Sun Aug 28 20:35:30 2016 -0500
+
+    fix lazy init bug in pos tagger, precautionary changes in some other annotators to avoid potential initialization problems of the same kind
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index ea2eea6d..a6cb0386 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -16,6 +16,10 @@ import java.util.Properties;
+ 
+ /**
+  * An interface for creating views of a specified name from a {@link TextAnnotation}
++ * IMPORTANT FOR DERIVED CLASSES: if you initialize fields at declaration rather than in the constructor,
++ *     those assignments take place AFTER the super.constructor has run -- so e.g. you cannot
++ *     use a Logger you declare in this way to log messages in the initialize() method that
++ *     is called by the Annotator class constructor.
+  *
+  * @author Vivek Srikumar, Mark Sammons, Christos Christodoulopoulos
+  */
+
+commit 15faa528ecda2679b8e631140b1116c84c2710a3
+Author: khashab2 <khashab2@illinois.edu>
+Date:   Fri Aug 12 22:17:19 2016 -0700
+
+    Formatting the file. No change in functionailty.
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index f34d4140..ea2eea6d 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -1,11 +1,8 @@
+ /**
+- * This software is released under the University of Illinois/Research and
+- *  Academic Use License. See the LICENSE file in the root folder for details.
+- * Copyright (c) 2016
++ * This software is released under the University of Illinois/Research and Academic Use License. See
++ * the LICENSE file in the root folder for details. Copyright (c) 2016
+  *
+- * Developed by:
+- * The Cognitive Computation Group
+- * University of Illinois at Urbana-Champaign
++ * Developed by: The Cognitive Computation Group University of Illinois at Urbana-Champaign
+  * http://cogcomp.cs.illinois.edu/
+  */
+ package edu.illinois.cs.cogcomp.annotation;
+@@ -39,8 +36,8 @@ public abstract class Annotator {
+      * set the name of the View this Annotator creates, and the list of prerequisite Views that this
+      * Annotator requires as input
+      *
+-     * @param viewName      The name of the View this annotator will populate. This will be used to
+-     *                      access the created view from the TextAnnotation holding it.
++     * @param viewName The name of the View this annotator will populate. This will be used to
++     *        access the created view from the TextAnnotation holding it.
+      * @param requiredViews The views that must be populated for this new view to be created.
+      */
+     public Annotator(String viewName, String[] requiredViews) {
+@@ -49,76 +46,85 @@ public abstract class Annotator {
+ 
+     /**
+      * explicitly declare whether lazy initialization should be used
+-     * @param viewName      The name of the View this annotator will populate. This will be used to
+-     *                      access the created view from the TextAnnotation holding it.
++     * 
++     * @param viewName The name of the View this annotator will populate. This will be used to
++     *        access the created view from the TextAnnotation holding it.
+      * @param requiredViews The views that must be populated for this new view to be created.
+-     * @param isLazilyInitialized if 'true', defers the initialization of the derived class until getView() is called.
++     * @param isLazilyInitialized if 'true', defers the initialization of the derived class until
++     *        getView() is called.
+      */
+-    public Annotator(String viewName, String[] requiredViews, boolean isLazilyInitialized ) {
++    public Annotator(String viewName, String[] requiredViews, boolean isLazilyInitialized) {
+         this(viewName, requiredViews, isLazilyInitialized, new ResourceManager(new Properties()));
+     }
+ 
+ 
+     /**
+-     * If lazy initialization is desired, set the property {@link AnnotatorConfigurator#IS_LAZILY_INITIALIZED} in
+-     *   the ResourceManager argument
+-     * @param viewName      The name of the View this annotator will populate. This will be used to
+-     *                      access the created view from the TextAnnotation holding it.
++     * If lazy initialization is desired, set the property
++     * {@link AnnotatorConfigurator#IS_LAZILY_INITIALIZED} in the ResourceManager argument
++     * 
++     * @param viewName The name of the View this annotator will populate. This will be used to
++     *        access the created view from the TextAnnotation holding it.
+      * @param requiredViews The views that must be populated for this new view to be created.
+-     * @param rm            configuration parameters. lazy initialization is set to 'false' by default.
++     * @param rm configuration parameters. lazy initialization is set to 'false' by default.
+      */
+-    public Annotator(String viewName, String[] requiredViews, ResourceManager rm  ) {
+-        this(viewName, requiredViews, rm.getBoolean(AnnotatorConfigurator.IS_LAZILY_INITIALIZED.key, Configurator.FALSE),
+-                new AnnotatorConfigurator().getConfig( rm ));
++    public Annotator(String viewName, String[] requiredViews, ResourceManager rm) {
++        this(viewName, requiredViews, rm.getBoolean(
++                AnnotatorConfigurator.IS_LAZILY_INITIALIZED.key, Configurator.FALSE),
++                new AnnotatorConfigurator().getConfig(rm));
+     }
+ 
+ 
+     /**
+-     * some annotators have complex initialization, so will have to pass a ResourceManager to be on hand for their
+-     *    initialization if non-lazy initialization is desired.
+-     * @param viewName      The name of the View this annotator will populate. This will be used to
+-     *                      access the created view from the TextAnnotation holding it.
++     * some annotators have complex initialization, so will have to pass a ResourceManager to be on
++     * hand for their initialization if non-lazy initialization is desired.
++     * 
++     * @param viewName The name of the View this annotator will populate. This will be used to
++     *        access the created view from the TextAnnotation holding it.
+      * @param requiredViews The views that must be populated for this new view to be created.
+-     * @param isLazilyInitialized if 'true', defers the initialization of the derived class until getView() is called.
+-     * @param nonDefaultRm these properties are stored for use by derived class, esp. in initialize()
++     * @param isLazilyInitialized if 'true', defers the initialization of the derived class until
++     *        getView() is called.
++     * @param nonDefaultRm these properties are stored for use by derived class, esp. in
++     *        initialize()
+      */
+-    public Annotator(String viewName, String[] requiredViews, boolean isLazilyInitialized, ResourceManager nonDefaultRm ) {
++    public Annotator(String viewName, String[] requiredViews, boolean isLazilyInitialized,
++            ResourceManager nonDefaultRm) {
+         this.viewName = viewName;
+         this.requiredViews = requiredViews;
+         this.nonDefaultRm = nonDefaultRm;
+         isInitialized = false;
+-        if ( !isLazilyInitialized )
++        if (!isLazilyInitialized)
+             doInitialize();
+     }
+ 
+ 
+     /**
+-     * Derived classes use this to load memory- or time-consuming resources.
+-     * <b>Don't try to log from this method unless your Logger is static.</b> Generated code puts non-static
+-     *    Logger initialization in the constructor, so if lazyInitialize is 'false' you'll get a null pointer
+-     *    exception trying to write to Logger in initialize().
++     * Derived classes use this to load memory- or time-consuming resources. <b>Don't try to log
++     * from this method unless your Logger is static.</b> Generated code puts non-static Logger
++     * initialization in the constructor, so if lazyInitialize is 'false' you'll get a null pointer
++     * exception trying to write to Logger in initialize().
++     * 
+      * @param rm configuration parameters
+      */
+-    public abstract void initialize( ResourceManager rm );
++    public abstract void initialize(ResourceManager rm);
+ 
+ 
+     /**
+      * If you want lazy initialization, this method must load the component models/resources,
+      * Default implementation just sets the relevant field to 'true'.
+      */
+-    final public void doInitialize()
+-    {
+-        initialize( nonDefaultRm );
++    final public void doInitialize() {
++        initialize(nonDefaultRm);
+         isInitialized = true;
+     }
+ 
+ 
+     /**
+-     * Indicates whether or not all models/resources have been loaded. Purpose is to support lazy initialization.
++     * Indicates whether or not all models/resources have been loaded. Purpose is to support lazy
++     * initialization.
++     * 
+      * @return 'true' if model is initialized, 'false' otherwise.
+      */
+-    public boolean isInitialized()
+-    {
++    public boolean isInitialized() {
+         return isInitialized;
+     }
+ 
+@@ -142,6 +148,7 @@ public abstract class Annotator {
+ 
+     /**
+      * Add the view named by getViewName() to the TextAnnotation argument, and return the View
++     * 
+      * @param ta
+      * @return the newly created View.
+      * @throws AnnotatorException
+@@ -152,15 +159,14 @@ public abstract class Annotator {
+     }
+ 
+     /**
+-     * First, checks whether model is initialized, and calls initialize() if not.
+-     * Then, calls addView().
+-     * IMPORTANT: clients should always call getView().
++     * First, checks whether model is initialized, and calls initialize() if not. Then, calls
++     * addView(). IMPORTANT: clients should always call getView().
++     * 
+      * @param ta
+      */
+     private void lazyAddView(TextAnnotation ta) throws AnnotatorException {
+ 
+-        if ( !isInitialized() )
+-        {
++        if (!isInitialized()) {
+             doInitialize();
+         }
+         addView(ta);
+
+commit 074caed6e1165bae2c12c8d3062f1ad47faad858
+Author: Mark Sammons <mssammon@illinois.edu>
+Date:   Thu Aug 11 17:51:02 2016 -0500
+
+    fixes to intialization. Don't call logger in initialize() methods.
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index 78637a46..f34d4140 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -85,9 +85,8 @@ public abstract class Annotator {
+     public Annotator(String viewName, String[] requiredViews, boolean isLazilyInitialized, ResourceManager nonDefaultRm ) {
+         this.viewName = viewName;
+         this.requiredViews = requiredViews;
+-        this.isInitialized = !isLazilyInitialized;
+         this.nonDefaultRm = nonDefaultRm;
+-
++        isInitialized = false;
+         if ( !isLazilyInitialized )
+             doInitialize();
+     }
+@@ -95,7 +94,9 @@ public abstract class Annotator {
+ 
+     /**
+      * Derived classes use this to load memory- or time-consuming resources.
+-     *
++     * <b>Don't try to log from this method unless your Logger is static.</b> Generated code puts non-static
++     *    Logger initialization in the constructor, so if lazyInitialize is 'false' you'll get a null pointer
++     *    exception trying to write to Logger in initialize().
+      * @param rm configuration parameters
+      */
+     public abstract void initialize( ResourceManager rm );
+
+commit dacb79f9eac1cbf70b23110bb80de0ac7e68ac54
+Author: Mark Sammons <mssammon@illinois.edu>
+Date:   Thu Aug 11 14:09:30 2016 -0500
+
+    improved encapsulation of lazy initialization.
+    Modified version number to snapshot. Please remember to update version number with increment-pom-versions.sh when you accept the PR and deploy the code.
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index c54700a0..78637a46 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -49,9 +49,10 @@ public abstract class Annotator {
+ 
+     /**
+      * explicitly declare whether lazy initialization should be used
+-     * @param viewName
+-     * @param requiredViews
+-     * @param isLazilyInitialized
++     * @param viewName      The name of the View this annotator will populate. This will be used to
++     *                      access the created view from the TextAnnotation holding it.
++     * @param requiredViews The views that must be populated for this new view to be created.
++     * @param isLazilyInitialized if 'true', defers the initialization of the derived class until getView() is called.
+      */
+     public Annotator(String viewName, String[] requiredViews, boolean isLazilyInitialized ) {
+         this(viewName, requiredViews, isLazilyInitialized, new ResourceManager(new Properties()));
+@@ -59,24 +60,27 @@ public abstract class Annotator {
+ 
+ 
+     /**
+-     * If lazy initialization is desired, set the property {@link Configurator#IS_LAZILY_INITIALIZED} in
++     * If lazy initialization is desired, set the property {@link AnnotatorConfigurator#IS_LAZILY_INITIALIZED} in
+      *   the ResourceManager argument
+-     * @param viewName
+-     * @param requiredViews
+-     * @param rm
++     * @param viewName      The name of the View this annotator will populate. This will be used to
++     *                      access the created view from the TextAnnotation holding it.
++     * @param requiredViews The views that must be populated for this new view to be created.
++     * @param rm            configuration parameters. lazy initialization is set to 'false' by default.
+      */
+     public Annotator(String viewName, String[] requiredViews, ResourceManager rm  ) {
+-        this(viewName, requiredViews, rm.getBoolean(Configurator.IS_LAZILY_INITIALIZED.key), rm);
++        this(viewName, requiredViews, rm.getBoolean(AnnotatorConfigurator.IS_LAZILY_INITIALIZED.key, Configurator.FALSE),
++                new AnnotatorConfigurator().getConfig( rm ));
+     }
+ 
+ 
+     /**
+      * some annotators have complex initialization, so will have to pass a ResourceManager to be on hand for their
+      *    initialization if non-lazy initialization is desired.
+-     * @param viewName
+-     * @param requiredViews
+-     * @param isLazilyInitialized
+-     * @param nonDefaultRm
++     * @param viewName      The name of the View this annotator will populate. This will be used to
++     *                      access the created view from the TextAnnotation holding it.
++     * @param requiredViews The views that must be populated for this new view to be created.
++     * @param isLazilyInitialized if 'true', defers the initialization of the derived class until getView() is called.
++     * @param nonDefaultRm these properties are stored for use by derived class, esp. in initialize()
+      */
+     public Annotator(String viewName, String[] requiredViews, boolean isLazilyInitialized, ResourceManager nonDefaultRm ) {
+         this.viewName = viewName;
+@@ -85,19 +89,25 @@ public abstract class Annotator {
+         this.nonDefaultRm = nonDefaultRm;
+ 
+         if ( !isLazilyInitialized )
+-            initialize();
++            doInitialize();
+     }
+ 
+ 
++    /**
++     * Derived classes use this to load memory- or time-consuming resources.
++     *
++     * @param rm configuration parameters
++     */
++    public abstract void initialize( ResourceManager rm );
+ 
+ 
+     /**
+-     * If you want lazy initialization, this method must load the component models/resources, allowing lazy initialization,
+-     * and set the isInitialized field to 'true'.
++     * If you want lazy initialization, this method must load the component models/resources,
+      * Default implementation just sets the relevant field to 'true'.
+      */
+-    public void initialize()
++    final public void doInitialize()
+     {
++        initialize( nonDefaultRm );
+         isInitialized = true;
+     }
+ 
+@@ -143,14 +153,14 @@ public abstract class Annotator {
+     /**
+      * First, checks whether model is initialized, and calls initialize() if not.
+      * Then, calls addView().
++     * IMPORTANT: clients should always call getView().
+      * @param ta
+      */
+     private void lazyAddView(TextAnnotation ta) throws AnnotatorException {
+ 
+         if ( !isInitialized() )
+         {
+-            initialize();
+-            isInitialized = true;
++            doInitialize();
+         }
+         addView(ta);
+     }
+@@ -167,10 +177,5 @@ public abstract class Annotator {
+         return requiredViews;
+     }
+ 
+-    /**
+-     * derived classes call this to set the state to indicate the Annotator is initialized.
+-     */
+-    protected void setIsInitialized() {
+-        isInitialized = true;
+-    }
++
+ }
+
+commit df788399bab825f9b3edc6ab1c50c60e0c895e3c
+Author: Mark Sammons <mssammon@illinois.edu>
+Date:   Wed Aug 10 17:53:43 2016 -0500
+
+    first attempt at generic lazy initialization option for Annotator and derived classes. Updated all (?) annotators using significant resources.
+    Tests now pass, after some changes to Annotator and derived classes to handle deferred initialization
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index 82971a4a..c54700a0 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -12,6 +12,7 @@ package edu.illinois.cs.cogcomp.annotation;
+ 
+ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
+ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.View;
++import edu.illinois.cs.cogcomp.core.utilities.configuration.Configurator;
+ import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
+ 
+ import java.util.Properties;
+@@ -46,10 +47,29 @@ public abstract class Annotator {
+         this(viewName, requiredViews, false);
+     }
+ 
++    /**
++     * explicitly declare whether lazy initialization should be used
++     * @param viewName
++     * @param requiredViews
++     * @param isLazilyInitialized
++     */
+     public Annotator(String viewName, String[] requiredViews, boolean isLazilyInitialized ) {
+         this(viewName, requiredViews, isLazilyInitialized, new ResourceManager(new Properties()));
+     }
+ 
++
++    /**
++     * If lazy initialization is desired, set the property {@link Configurator#IS_LAZILY_INITIALIZED} in
++     *   the ResourceManager argument
++     * @param viewName
++     * @param requiredViews
++     * @param rm
++     */
++    public Annotator(String viewName, String[] requiredViews, ResourceManager rm  ) {
++        this(viewName, requiredViews, rm.getBoolean(Configurator.IS_LAZILY_INITIALIZED.key), rm);
++    }
++
++
+     /**
+      * some annotators have complex initialization, so will have to pass a ResourceManager to be on hand for their
+      *    initialization if non-lazy initialization is desired.
+@@ -96,7 +116,7 @@ public abstract class Annotator {
+      *
+      * @param ta the TextAnnotation to modify.
+      */
+-    public abstract void addView(TextAnnotation ta) throws AnnotatorException;
++    protected abstract void addView(TextAnnotation ta) throws AnnotatorException;
+ 
+ 
+     /**
+
+commit 6fde90746acba74c7f614ae9d7e39f1c7d79dbbf
+Author: Mark Sammons <mssammon@illinois.edu>
+Date:   Wed Aug 10 15:26:00 2016 -0500
+
+    first attempt at generic lazy initialization option for Annotator and derived classes. Updated all (?) annotators using significant resources.
+    Currently failing tests of SimpleGazetteerAnnotator.
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index eace8e46..82971a4a 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -12,6 +12,9 @@ package edu.illinois.cs.cogcomp.annotation;
+ 
+ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
+ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.View;
++import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
++
++import java.util.Properties;
+ 
+ /**
+  * An interface for creating views of a specified name from a {@link TextAnnotation}
+@@ -23,22 +26,71 @@ public abstract class Annotator {
+ 
+     protected String viewName;
+     protected String[] requiredViews;
++    protected boolean isInitialized;
++
++    /**
++     * stores configuration for lazy initialization.
++     */
++    protected ResourceManager nonDefaultRm;
+ 
+ 
+     /**
+      * set the name of the View this Annotator creates, and the list of prerequisite Views that this
+      * Annotator requires as input
+      *
+-     * @param viewName The name of the View this annotator will populate. This will be used to
+-     *        access the created view from the TextAnnotation holding it.
++     * @param viewName      The name of the View this annotator will populate. This will be used to
++     *                      access the created view from the TextAnnotation holding it.
+      * @param requiredViews The views that must be populated for this new view to be created.
+      */
+     public Annotator(String viewName, String[] requiredViews) {
++        this(viewName, requiredViews, false);
++    }
++
++    public Annotator(String viewName, String[] requiredViews, boolean isLazilyInitialized ) {
++        this(viewName, requiredViews, isLazilyInitialized, new ResourceManager(new Properties()));
++    }
++
++    /**
++     * some annotators have complex initialization, so will have to pass a ResourceManager to be on hand for their
++     *    initialization if non-lazy initialization is desired.
++     * @param viewName
++     * @param requiredViews
++     * @param isLazilyInitialized
++     * @param nonDefaultRm
++     */
++    public Annotator(String viewName, String[] requiredViews, boolean isLazilyInitialized, ResourceManager nonDefaultRm ) {
+         this.viewName = viewName;
+         this.requiredViews = requiredViews;
++        this.isInitialized = !isLazilyInitialized;
++        this.nonDefaultRm = nonDefaultRm;
++
++        if ( !isLazilyInitialized )
++            initialize();
++    }
++
++
++
++
++    /**
++     * If you want lazy initialization, this method must load the component models/resources, allowing lazy initialization,
++     * and set the isInitialized field to 'true'.
++     * Default implementation just sets the relevant field to 'true'.
++     */
++    public void initialize()
++    {
++        isInitialized = true;
+     }
+ 
+ 
++    /**
++     * Indicates whether or not all models/resources have been loaded. Purpose is to support lazy initialization.
++     * @return 'true' if model is initialized, 'false' otherwise.
++     */
++    public boolean isInitialized()
++    {
++        return isInitialized;
++    }
++
+     /**
+      * create and add the view named by getViewName() to the TextAnnotation argument.
+      *
+@@ -58,17 +110,32 @@ public abstract class Annotator {
+ 
+ 
+     /**
+-     * add the view named by getViewName() to the TextAnnotation argument, and return the View
+-     *
++     * Add the view named by getViewName() to the TextAnnotation argument, and return the View
+      * @param ta
+      * @return the newly created View.
+      * @throws AnnotatorException
+      */
+     public final View getView(TextAnnotation ta) throws AnnotatorException {
+-        addView(ta);
++        lazyAddView(ta);
+         return ta.getView(viewName);
+     }
+ 
++    /**
++     * First, checks whether model is initialized, and calls initialize() if not.
++     * Then, calls addView().
++     * @param ta
++     */
++    private void lazyAddView(TextAnnotation ta) throws AnnotatorException {
++
++        if ( !isInitialized() )
++        {
++            initialize();
++            isInitialized = true;
++        }
++        addView(ta);
++    }
++
++
+     /**
+      * Can be used internally by {@link BasicAnnotatorService} to check for pre-requisites before
+      * calling any single (external) {@link Annotator}.
+@@ -80,4 +147,10 @@ public abstract class Annotator {
+         return requiredViews;
+     }
+ 
++    /**
++     * derived classes call this to set the state to indicate the Annotator is initialized.
++     */
++    protected void setIsInitialized() {
++        isInitialized = true;
++    }
+ }
+
+commit 7841982b12cc8847d6742f0a34689c9a9c298f1e
+Author: Mark Sammons <mssammon@illinois.edu>
+Date:   Sun May 8 21:22:55 2016 -0500
+
+    minor fixes: Annotator.getView() is now final; moved README_FEX.md content to Edison readme; changed param in CreateTestTaResource to set RESPECT_TOKENIZATION to false.
+    Fixed a bug in curator client (TextAnnotation mapping from Record views) introduced by change to charOffsetToToken behavior in TextAnnotation (not mapping spaces between tokens to token offsets)
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index 59f772df..eace8e46 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -64,7 +64,7 @@ public abstract class Annotator {
+      * @return the newly created View.
+      * @throws AnnotatorException
+      */
+-    public View getView(TextAnnotation ta) throws AnnotatorException {
++    public final View getView(TextAnnotation ta) throws AnnotatorException {
+         addView(ta);
+         return ta.getView(viewName);
+     }
+
+commit 456b16e1bf33334373638f1f10e55eaa1cfb80f4
+Author: Mark Sammons <mssammon@illinois.edu>
+Date:   Sun May 8 21:22:55 2016 -0500
+
+    minor fixes: Annotator.getView() is now final; moved README_FEX.md content to Edison readme; changed param in CreateTestTaResource to set RESPECT_TOKENIZATION to false.
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index 59f772df..eace8e46 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -64,7 +64,7 @@ public abstract class Annotator {
+      * @return the newly created View.
+      * @throws AnnotatorException
+      */
+-    public View getView(TextAnnotation ta) throws AnnotatorException {
++    public final View getView(TextAnnotation ta) throws AnnotatorException {
+         addView(ta);
+         return ta.getView(viewName);
+     }
+
+commit bade000945847a77824951bfd1860d45b69d8ee1
+Author: khashab2 <khashab2@illinois.edu>
+Date:   Fri Apr 22 14:51:10 2016 -0500
+
+    adding licence to core-utils.
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index bdc52536..59f772df 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -1,3 +1,13 @@
++/**
++ * This software is released under the University of Illinois/Research and
++ *  Academic Use License. See the LICENSE file in the root folder for details.
++ * Copyright (c) 2016
++ *
++ * Developed by:
++ * The Cognitive Computation Group
++ * University of Illinois at Urbana-Champaign
++ * http://cogcomp.cs.illinois.edu/
++ */
+ package edu.illinois.cs.cogcomp.annotation;
+ 
+ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
+
+commit 3a4ba27dd198b634f7b9aac234c66dc8d01107b5
+Author: Christos Christodoulopoulos <christod@illinois.edu>
+Date:   Sat Mar 12 18:58:50 2016 -0600
+
+    Restored CreateTestTAResource
+    Applied formatting to NER
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index 4745e47d..bdc52536 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -16,12 +16,12 @@ public abstract class Annotator {
+ 
+ 
+     /**
+-     * set the name of the View this Annotator creates, and the list of prerequisite Views that this Annotator
+-     *    requires as input
++     * set the name of the View this Annotator creates, and the list of prerequisite Views that this
++     * Annotator requires as input
+      *
+      * @param viewName The name of the View this annotator will populate. This will be used to
+-     *                 access the created view from the TextAnnotation holding it.
+-     * @param requiredViews  The views that must be populated for this new view to be created.
++     *        access the created view from the TextAnnotation holding it.
++     * @param requiredViews The views that must be populated for this new view to be created.
+      */
+     public Annotator(String viewName, String[] requiredViews) {
+         this.viewName = viewName;
+@@ -32,7 +32,7 @@ public abstract class Annotator {
+     /**
+      * create and add the view named by getViewName() to the TextAnnotation argument.
+      *
+-     * @param ta  the TextAnnotation to modify.
++     * @param ta the TextAnnotation to modify.
+      */
+     public abstract void addView(TextAnnotation ta) throws AnnotatorException;
+ 
+
+commit f44d6127425b0fe55b34c09a9294de2cef38b1b4
+Author: Mark Sammons <mssammon@illinois.edu>
+Date:   Tue Jan 26 15:14:32 2016 -0600
+
+    integrated LREC feature extraction code into features.lrec package
+    fixed wordnet/jwnl dependency:
+    -- lemmatizer uses wordnet-dict binary
+    -- edison still uses jwnl-prime
+    ,minor auto-suggested fixes throughout
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index f6a3fbd6..d138c52c 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -4,8 +4,7 @@ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation
+ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.View;
+ 
+ /**
+- * An interface for creating views of a specified name from a
+- * {@link TextAnnotation}
++ * An interface for creating views of a specified name from a {@link TextAnnotation}
+  *
+  * @author Vivek Srikumar, Mark Sammons, Christos Christodoulopoulos
+  */
+@@ -17,14 +16,14 @@ public abstract class Annotator {
+ 
+ 
+     /**
+-     * set the name of the View this Annotator creates, and the list of prerequisite Views that this Annotator
+-     *    requires as input
++     * set the name of the View this Annotator creates, and the list of prerequisite Views that this
++     * Annotator requires as input
+      *
+-     * @param viewName
+-     * @param requiredViews
++     * @param viewName The name of the View this annotator will populate. This will be used to
++     *                 access the created view from the TextAnnotation holding it.
++     * @param requiredViews  The views that must be populated for this new view to be created.
+      */
+-    public Annotator( String viewName, String[] requiredViews )
+-    {
++    public Annotator(String viewName, String[] requiredViews) {
+         this.viewName = viewName;
+         this.requiredViews = requiredViews;
+     }
+@@ -33,14 +32,15 @@ public abstract class Annotator {
+     /**
+      * create and add the view named by getViewName() to the TextAnnotation argument.
+      *
+-     * @param ta
++     * @param ta  the TextAnnotation to modify.
+      */
+-    public abstract void addView( TextAnnotation ta ) throws AnnotatorException;
++    public abstract void addView(TextAnnotation ta) throws AnnotatorException;
+ 
+ 
+     /**
+      * return the name of the View created by this Annotator
+-     * @return
++     * 
++     * @return the name generated by this view.
+      */
+     public String getViewName() {
+         return viewName;
+@@ -51,23 +51,22 @@ public abstract class Annotator {
+      * add the view named by getViewName() to the TextAnnotation argument, and return the View
+      *
+      * @param ta
+-     * @return
++     * @return the newly created View.
+      * @throws AnnotatorException
+      */
+-    public View getView(TextAnnotation ta) throws AnnotatorException
+-    {
+-        addView( ta );
+-        return ta.getView( viewName );
++    public View getView(TextAnnotation ta) throws AnnotatorException {
++        addView(ta);
++        return ta.getView(viewName);
+     }
+ 
+     /**
+-     * Can be used internally by {@link BasicAnnotatorService} to check for pre-requisites before calling
+-     * any single (external) {@link Annotator}.
++     * Can be used internally by {@link BasicAnnotatorService} to check for pre-requisites before
++     * calling any single (external) {@link Annotator}.
+      *
+-     * @return The list of {@link edu.illinois.cs.cogcomp.core.datastructures.ViewNames} required by this ViewGenerator
++     * @return The list of {@link edu.illinois.cs.cogcomp.core.datastructures.ViewNames} required by
++     *         this ViewGenerator
+      */
+-    public String[] getRequiredViews()
+-    {
++    public String[] getRequiredViews() {
+         return requiredViews;
+     }
+ 
+
+commit 1398eb60c743be594df9b5c413abe87ffd432497
+Author: khashab2 <khashab2@illinois.edu>
+Date:   Tue Dec 15 01:50:59 2015 -0600
+
+    formatting core utils
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+index f6a3fbd6..e198092a 100644
+--- a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -4,8 +4,7 @@ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation
+ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.View;
+ 
+ /**
+- * An interface for creating views of a specified name from a
+- * {@link TextAnnotation}
++ * An interface for creating views of a specified name from a {@link TextAnnotation}
+  *
+  * @author Vivek Srikumar, Mark Sammons, Christos Christodoulopoulos
+  */
+@@ -17,14 +16,13 @@ public abstract class Annotator {
+ 
+ 
+     /**
+-     * set the name of the View this Annotator creates, and the list of prerequisite Views that this Annotator
+-     *    requires as input
++     * set the name of the View this Annotator creates, and the list of prerequisite Views that this
++     * Annotator requires as input
+      *
+      * @param viewName
+      * @param requiredViews
+      */
+-    public Annotator( String viewName, String[] requiredViews )
+-    {
++    public Annotator(String viewName, String[] requiredViews) {
+         this.viewName = viewName;
+         this.requiredViews = requiredViews;
+     }
+@@ -35,11 +33,12 @@ public abstract class Annotator {
+      *
+      * @param ta
+      */
+-    public abstract void addView( TextAnnotation ta ) throws AnnotatorException;
++    public abstract void addView(TextAnnotation ta) throws AnnotatorException;
+ 
+ 
+     /**
+      * return the name of the View created by this Annotator
++     * 
+      * @return
+      */
+     public String getViewName() {
+@@ -54,20 +53,19 @@ public abstract class Annotator {
+      * @return
+      * @throws AnnotatorException
+      */
+-    public View getView(TextAnnotation ta) throws AnnotatorException
+-    {
+-        addView( ta );
+-        return ta.getView( viewName );
++    public View getView(TextAnnotation ta) throws AnnotatorException {
++        addView(ta);
++        return ta.getView(viewName);
+     }
+ 
+     /**
+-     * Can be used internally by {@link BasicAnnotatorService} to check for pre-requisites before calling
+-     * any single (external) {@link Annotator}.
++     * Can be used internally by {@link BasicAnnotatorService} to check for pre-requisites before
++     * calling any single (external) {@link Annotator}.
+      *
+-     * @return The list of {@link edu.illinois.cs.cogcomp.core.datastructures.ViewNames} required by this ViewGenerator
++     * @return The list of {@link edu.illinois.cs.cogcomp.core.datastructures.ViewNames} required by
++     *         this ViewGenerator
+      */
+-    public String[] getRequiredViews()
+-    {
++    public String[] getRequiredViews() {
+         return requiredViews;
+     }
+ 
+
+commit 5ad02d80d6580f6c46d479477d567a1bbbdc88f6
+Author: CogComp Dev <mssammon@illinois.edu>
+Date:   Mon Nov 30 13:05:42 2015 -0600
+
+    refactored Annotator interface (became abstract class)
+    -- derived classes now must override "addView()"; getView() is still the method called, and it calls addView() and returns the view it creates.
+    moved Annotator to annotation package
+    modified a bunch of ViewGenerators to use new interface, fixed some dependency errors (missing view requirements)
+
+diff --git a/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+new file mode 100644
+index 00000000..f6a3fbd6
+--- /dev/null
++++ b/core-utilities/src/main/java/edu/illinois/cs/cogcomp/annotation/Annotator.java
+@@ -0,0 +1,74 @@
++package edu.illinois.cs.cogcomp.annotation;
++
++import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
++import edu.illinois.cs.cogcomp.core.datastructures.textannotation.View;
++
++/**
++ * An interface for creating views of a specified name from a
++ * {@link TextAnnotation}
++ *
++ * @author Vivek Srikumar, Mark Sammons, Christos Christodoulopoulos
++ */
++public abstract class Annotator {
++
++
++    protected String viewName;
++    protected String[] requiredViews;
++
++
++    /**
++     * set the name of the View this Annotator creates, and the list of prerequisite Views that this Annotator
++     *    requires as input
++     *
++     * @param viewName
++     * @param requiredViews
++     */
++    public Annotator( String viewName, String[] requiredViews )
++    {
++        this.viewName = viewName;
++        this.requiredViews = requiredViews;
++    }
++
++
++    /**
++     * create and add the view named by getViewName() to the TextAnnotation argument.
++     *
++     * @param ta
++     */
++    public abstract void addView( TextAnnotation ta ) throws AnnotatorException;
++
++
++    /**
++     * return the name of the View created by this Annotator
++     * @return
++     */
++    public String getViewName() {
++        return viewName;
++    }
++
++
++    /**
++     * add the view named by getViewName() to the TextAnnotation argument, and return the View
++     *
++     * @param ta
++     * @return
++     * @throws AnnotatorException
++     */
++    public View getView(TextAnnotation ta) throws AnnotatorException
++    {
++        addView( ta );
++        return ta.getView( viewName );
++    }
++
++    /**
++     * Can be used internally by {@link BasicAnnotatorService} to check for pre-requisites before calling
++     * any single (external) {@link Annotator}.
++     *
++     * @return The list of {@link edu.illinois.cs.cogcomp.core.datastructures.ViewNames} required by this ViewGenerator
++     */
++    public String[] getRequiredViews()
++    {
++        return requiredViews;
++    }
++
++}

@@ -203,7 +203,7 @@ public class ClassifierComparison {
     }
 
     /**
-     * Structured's higher performance on the train set and lower performance on test set is
+     * Structured's higher performance on the tune set and lower performance on test set is
      * indicative of overfitting
      */
     public static void reasonForBelievingThatStructuredIsPerformingWorseDueToOverfitting(
@@ -231,11 +231,11 @@ public class ClassifierComparison {
                         threshold, thickness, false);
 
 
-        System.out.println("Structured performance on train set "
+        System.out.println("Structured performance on tune set "
                 + structuredPerformanceOnTrainSet.getOverallStats()[2]);
         System.out.println("Structured performance on test set "
                 + structuredPerformanceOnTestSet.getOverallStats()[2]);
-        System.out.println("Local performance on train set "
+        System.out.println("Local performance on tune set "
                 + localPerformanceOnTrainSet.getOverallStats()[2]);
         System.out.println("Localperformance on test set "
                 + localPerformanceOnTestSet.getOverallStats()[2]);

@@ -89,7 +89,7 @@ public class VerbSenseClassifierMain {
         if (Boolean.parseBoolean(cacheDatasets))
             cacheDatasets();
 
-        // Step 2: Pre-extract and train the model
+        // Step 2: Pre-extract and tune the model
         preExtract();
         train();
 
@@ -267,7 +267,7 @@ public class VerbSenseClassifierMain {
         return featureCache;
     }
 
-    @CommandDescription(description = "Trains the verb-sense model.", usage = "train")
+    @CommandDescription(description = "Trains the verb-sense model.", usage = "tune")
     public static void train() throws Exception {
         SenseManager manager = getManager(true);
         int numThreads = Runtime.getRuntime().availableProcessors();

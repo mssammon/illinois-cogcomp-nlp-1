@@ -14,7 +14,7 @@ classDir=target/classes/
 classpath="${classDir}"
 LIB="target/dependency"
 
-TRAIN_DATA="/shared/corpora/corporaWeb/written/eng/chunking/conll2000distributions/train.txt"
+TRAIN_DATA="/shared/corpora/corporaWeb/written/eng/chunking/conll2000distributions/tune.txt"
 MODEL_DIR="edu/illinois/cs/cogcomp/chunker/main/lbjava/"
 #MODEL_NAME="illinois-chunker"
 

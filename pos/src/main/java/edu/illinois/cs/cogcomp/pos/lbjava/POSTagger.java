@@ -17,6 +17,7 @@ import edu.illinois.cs.cogcomp.lbjava.nlp.seg.Token;
 import edu.illinois.cs.cogcomp.pos.POSConfigurator;
 
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -48,6 +49,20 @@ public class POSTagger extends Classifier {
     private static final WordForm __wordForm = new WordForm();
 
     public POSTagger() {
+        this(new ResourceManager(new Properties()));
+    }
+
+    public POSTagger(ResourceManager nonDefaultConfig) {
+        ResourceManager rm = new POSConfigurator().getConfig(nonDefaultConfig);
+        knownModelFile = rm.getString("knownModelPath");
+        knownLexFile = rm.getString("knownLexPath");
+        unknownModelFile = rm.getString("unknownModelPath");
+        unknownLexFile = rm.getString("unknownLexPath");
+        baselineModelFile = rm.getString("baselineModelPath");
+        baselineLexFile = rm.getString("baselineLexPath");
+        mikheevModelFile = rm.getString("mikheevModelPath");
+        mikheevLexFile = rm.getString("mikheevLexPath");
+
         containingPackage = "edu.illinois.cs.cogcomp.pos.lbjava";
         name = "POSTagger";
     }

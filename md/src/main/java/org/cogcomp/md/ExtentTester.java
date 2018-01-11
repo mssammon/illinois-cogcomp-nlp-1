@@ -72,7 +72,7 @@ public class ExtentTester {
         int false_predicted = 0;
         int false_correct = 0;
         for (int i = 0; i < 5; i++){
-            ExtentReader train_parser = new ExtentReader("data/partition_with_dev/train/"  + i);
+            ExtentReader train_parser = new ExtentReader("data/partition_with_dev/tune/"  + i);
             extent_classifier classifier = train_extent_classifier(train_parser);
 
             extentLabel output = new extentLabel();
@@ -235,7 +235,7 @@ public class ExtentTester {
         Gazetteers gazetteers = GazetteersFactory.get();
         BrownClusters brownClusters = BrownClusters.get();
         for (int i = 0; i < 1; i++) {
-            ExtentReader train_parser = new ExtentReader("data/partition_with_dev/train/"  + i, "COMBINED-ALL-TRAIN-" + i);
+            ExtentReader train_parser = new ExtentReader("data/partition_with_dev/tune/"  + i, "COMBINED-ALL-TRAIN-" + i);
             extent_classifier classifier = train_extent_classifier(train_parser);
             BIOCombinedReader bioCombinedReader = null;
             try{
@@ -319,9 +319,9 @@ public class ExtentTester {
         int total_mention_head_correct = 0;
         int total_mention_extent_correct = 0;
         for (int i = 0; i < 5; i++) {
-            BIOReader h_train_parser_nam = new BIOReader("data/partition_with_dev/train/" + i, "ACE05-TRAIN", "NAM", false);
-            BIOReader h_train_parser_nom = new BIOReader("data/partition_with_dev/train/" + i, "ACE05-TRAIN", "NOM", false);
-            BIOReader h_train_parser_pro = new BIOReader("data/partition_with_dev/train/" + i, "ACE05-TRAIN", "PRO", false);
+            BIOReader h_train_parser_nam = new BIOReader("data/partition_with_dev/tune/" + i, "ACE05-TRAIN", "NAM", false);
+            BIOReader h_train_parser_nom = new BIOReader("data/partition_with_dev/tune/" + i, "ACE05-TRAIN", "NOM", false);
+            BIOReader h_train_parser_pro = new BIOReader("data/partition_with_dev/tune/" + i, "ACE05-TRAIN", "PRO", false);
 
             bio_classifier_nam h_classifier_nam = BIOTester.train_nam_classifier(h_train_parser_nam);
             bio_classifier_nom h_classifier_nom = BIOTester.train_nom_classifier(h_train_parser_nom);
@@ -331,7 +331,7 @@ public class ExtentTester {
             h_candidates[1] = h_classifier_nom;
             h_candidates[2] = h_classifier_pro;
 
-            ExtentReader e_train_parser = new ExtentReader("data/partition_with_dev/train/"  + i);
+            ExtentReader e_train_parser = new ExtentReader("data/partition_with_dev/tune/"  + i);
             extent_classifier e_classifier = train_extent_classifier(e_train_parser);
 
             BIOReader test_parser = new BIOReader("data/partition_with_dev/eval/" + i, "ACE05-EVAL", "ALL", false);

@@ -17,7 +17,7 @@ import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
 public class ChunkerConfigurator extends Configurator {
 
     public static final Property TRAINING_DATA = new Property("trainingData",
-            "/shared/corpora/corporaWeb/written/eng/chunking/conll2000distributions/train.txt");
+            "/shared/corpora/corporaWeb/written/eng/chunking/conll2000distributions/tune.txt");
 
     public static final Property TEST_GOLDPOS_DATA = new Property("testGoldPOSData",
             "/shared/corpora/corporaWeb/written/eng/chunking/conll2000distributions/test.txt");

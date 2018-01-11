@@ -42,7 +42,7 @@ public class BIOCombinedReader extends BIOReader {
     Boolean _taOnly;
     /**
      * @param fold The fold index (0-4) you want to access
-     * @param mode Indicates the corpus and train/eval e.g. "ERE-TRAIN"
+     * @param mode Indicates the corpus and tune/eval e.g. "ERE-TRAIN"
      *              mode "ALL-TRAIN/EVAL" indicates hybrid corpus.
      * @param type Indicates the type (NAM/NOM/PRO/ALL) kept
      */

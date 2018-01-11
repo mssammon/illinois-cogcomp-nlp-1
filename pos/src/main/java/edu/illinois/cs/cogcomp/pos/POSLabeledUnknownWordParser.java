@@ -35,7 +35,7 @@ public class POSLabeledUnknownWordParser extends POSBracketToToken {
      *
      * @param file The name of the file containing labeled data.
      **/
-    POSLabeledUnknownWordParser(String file) {
+    public POSLabeledUnknownWordParser(String file) {
         super(file);
     }
 

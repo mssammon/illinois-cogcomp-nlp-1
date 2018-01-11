@@ -18,7 +18,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Simple class to build and train models from existing training data, as opposed to using the
+ * Simple class to build and tune models from existing training data, as opposed to using the
  * prepackaged jar.
  *
  * @author James Chen
