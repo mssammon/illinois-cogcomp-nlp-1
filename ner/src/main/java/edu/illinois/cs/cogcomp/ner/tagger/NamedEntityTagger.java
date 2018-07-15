@@ -34,7 +34,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * This tagger provided a file or a directory will read the plain text data and produced labeled
- * output. If no output directory name or file output name is provided, it will produce it's output
+ * output. If no output directory name or file output name is provided, it will write its output
  * to standard out.
  * <p>
  * 
