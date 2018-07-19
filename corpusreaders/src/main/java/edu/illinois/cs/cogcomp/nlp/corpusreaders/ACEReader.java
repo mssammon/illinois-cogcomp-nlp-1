@@ -144,7 +144,7 @@ public class ACEReader extends AnnotationReader<TextAnnotation> {
         List<String> adjFiles = new ArrayList<>();
 
         for (String f : xmlFiles)
-            if (f.matches("\\/adj\\/"))
+            if (f.contains("/adj/"))
                 adjFiles.add(f);
 
         if (adjFiles.isEmpty())
