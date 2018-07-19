@@ -13,12 +13,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -438,5 +433,23 @@ public class NERAnnotatorTest {
                 "L-MISC", "L-ORG", "L-PER", "O", "U-LOC", "U-MISC", "U-ORG", "U-PER"};
         Set<String> set = new HashSet(Arrays.asList(elements));
         assertTrue(tags.equals(set));
+    }
+
+
+    @Test
+    public void testLabelDistributionInConstituent() {
+        TextAnnotation ta = tab.createTextAnnotation(TEST_INPUT);
+        View view = null;
+        try {
+            view = getView(ta);
+        } catch (AnnotatorException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+        Constituent nec = ta.getView(ViewNames.NER_CONLL).getConstituents().get(0);
+
+        Map<String, Double> labelScores = nec.getLabelsToScores();
+        assertEquals(4, labelScores.size());
+        assertTrue(labelScores.containsKey("PER"));
     }
 }

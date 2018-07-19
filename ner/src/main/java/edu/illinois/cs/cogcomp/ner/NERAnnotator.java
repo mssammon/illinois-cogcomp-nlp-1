@@ -8,11 +8,10 @@
 package edu.illinois.cs.cogcomp.ner;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
+import edu.illinois.cs.cogcomp.core.datastructures.textannotation.Constituent;
+import edu.illinois.cs.cogcomp.ner.StringStatisticsUtils.CharacteristicWords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,6 +159,8 @@ public class NERAnnotator extends Annotator {
             // from NER.
             int startIndex = -1;
             String label = null;
+            Map<String, Double> labelsToScores = new HashMap<>();
+
             for (int j = 0; j < vector.size(); j++, tokenoffset++) {
                 NEWord neWord = (NEWord) (vector.get(j));
                 String prediction = neWord.neTypeLevel2;
@@ -169,6 +170,7 @@ public class NERAnnotator extends Annotator {
                 // inefficient, use enums, or nominalized indexes for this sort of thing.
                 if (prediction.startsWith("B-")) {
                     startIndex = tokenoffset;
+                    labelsToScores = buildScoreMap(neWord.predictionConfidencesLevel2Classifier);
                     label = prediction.substring(2);
                     open = true;
                 } else if (j > 0) {
@@ -177,6 +179,7 @@ public class NERAnnotator extends Annotator {
                             && (!previous_prediction.endsWith(prediction.substring(2)))) {
                         startIndex = tokenoffset;
                         label = prediction.substring(2);
+                        labelsToScores = buildScoreMap(neWord.predictionConfidencesLevel2Classifier);
                         open = true;
                     }
                 }
@@ -209,13 +212,48 @@ public class NERAnnotator extends Annotator {
                         if (e <= s)
                             e = s + 1;
 
-                        nerView.addSpanLabel(s, e, label, 1d);
+                        if (!label.equals(getMaxElement(labelsToScores)))
+                            throw new IllegalStateException("label doesn't agree with max from labels-to-scores");
+
+                        //nerView.addSpanLabel(s, e, label, 1d);
+                        // need to resolve 17 labels to 4
+                        nerView.addConstituent(new Constituent(labelsToScores, nerView.getViewName(), ta, s, e));
                         open = false;
                     }
                 }
             }
         }
         ta.addView(viewName, nerView);
+    }
+
+    private String getMaxElement(Map<String, Double> labelsToScores) {
+        double maxScore = Double.MIN_VALUE;
+        String maxElt = null;
+        for (Map.Entry<String, Double> entry : labelsToScores.entrySet()) {
+            if (entry.getValue() > maxScore) {
+                maxScore = entry.getValue();
+                maxElt = entry.getKey();
+            }
+        }
+        return maxElt;
+    }
+
+    private Map<String, Double> buildScoreMap(CharacteristicWords predictionConfidencesLevel2Classifier) {
+        Map<String, Double> scoreMap = new HashMap<>();
+        for (int i = 0; i < predictionConfidencesLevel2Classifier.topWords.size(); ++i) {
+            String label = predictionConfidencesLevel2Classifier.topWords.get(i);
+            if (label.startsWith("B-") || label.startsWith("U-")) { // only build map at start of entity
+                label = label.substring(2);
+                if (!scoreMap.containsKey(label))
+                    scoreMap.put(label, predictionConfidencesLevel2Classifier.topScores.get(i));
+                else {
+                    double newScore = predictionConfidencesLevel2Classifier.topScores.get(i);
+                    if (newScore > scoreMap.get(label))
+                        scoreMap.put(label, newScore);
+                }
+            }
+        }
+        return scoreMap;
     }
 
     /**

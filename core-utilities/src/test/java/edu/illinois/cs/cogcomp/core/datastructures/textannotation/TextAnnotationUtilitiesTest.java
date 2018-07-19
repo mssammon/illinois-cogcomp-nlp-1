@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -34,7 +35,7 @@ public class TextAnnotationUtilitiesTest {
      *   a particular view for a particular sentence (view is not generated in sentence level version)
      */
     @Test
-    public void test() {
+    public void testGetSubTextAnnotation() {
         TextAnnotation ta = DummyTextAnnotationGenerator.generateAnnotatedTextAnnotation(false, 3);
         TextAnnotation subTA = TextAnnotationUtilities.getSubTextAnnotation(ta, 2);
         assertTrue(subTA.getText().equals("The paving commenced Monday and will finish in June ."));
@@ -77,5 +78,35 @@ public class TextAnnotationUtilitiesTest {
         TreeView parseView = (TreeView) emptyTa.getView(ViewNames.PARSE_GOLD);
         String mappedParse = parseView.toString().trim();
         assertEquals(parse, mappedParse);
+    }
+
+
+    @Test
+    public void testCopyViewFromTo() {
+        String[] moreViews = new String[] {ViewNames.POS, ViewNames.LEMMA,
+                ViewNames.SHALLOW_PARSE, ViewNames.PARSE_GOLD};
+        String[] fewerViews = new String[] {ViewNames.POS};
+        String NEWVIEWNAME = "NEW_PARSE_GOLD";
+
+        TextAnnotation sourceTa = DummyTextAnnotationGenerator.generateAnnotatedTextAnnotation(moreViews, false, 3);
+        TextAnnotation targetTa = DummyTextAnnotationGenerator.generateAnnotatedTextAnnotation(fewerViews, false, 3);
+
+        assertTrue(sourceTa.hasView(ViewNames.PARSE_GOLD));
+        assertFalse(targetTa.hasView(ViewNames.PARSE_GOLD));
+
+        TextAnnotationUtilities.copyViewFromTo(ViewNames.PARSE_GOLD, sourceTa, NEWVIEWNAME, sourceTa, 0, sourceTa.getTokens().length, 0);
+        assertTrue(sourceTa.hasView(NEWVIEWNAME));
+
+        TextAnnotationUtilities.copyViewFromTo(ViewNames.PARSE_GOLD, sourceTa, targetTa, 0, sourceTa.getTokens().length, 0);
+
+        assertTrue(targetTa.hasView(ViewNames.PARSE_GOLD));
+
+        String sourceViewStr = ((TreeView) sourceTa.getView(ViewNames.PARSE_GOLD)).toString();
+
+        String targetViewStr = ((TreeView) targetTa.getView(ViewNames.PARSE_GOLD)).toString();
+
+        System.out.println("view string: " + sourceViewStr);
+
+        assertEquals(sourceViewStr, targetViewStr);
     }
 }

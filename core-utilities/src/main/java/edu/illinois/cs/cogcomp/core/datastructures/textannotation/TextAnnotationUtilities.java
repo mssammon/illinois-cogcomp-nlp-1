@@ -205,31 +205,59 @@ public class TextAnnotationUtilities {
         }
     }
 
+    /**
+     * copy a View from one TextAnnotation to another. Will fail if source and destination are the same.
+     * @param vuName
+     * @param ta
+     * @param newTA
+     * @param sourceStartTokenIndex
+     * @param sourceEndTokenIndex
+     * @param offset
+     */
     public static void copyViewFromTo(String vuName, TextAnnotation ta, TextAnnotation newTA, int sourceStartTokenIndex, int sourceEndTokenIndex, int offset) {
-        View vu = ta.getView(vuName);
+        copyViewFromTo(vuName, ta, vuName, newTA, sourceStartTokenIndex, sourceEndTokenIndex, offset);
+    }
+
+    /**
+     * copy a view from one TextAnnotation to another, renaming the view. Note that the source and destination
+     *     TextAnnotation can be the same in this case, if the view names are different.
+     * @param origVuName
+     * @param ta
+     * @param newVuName
+     * @param newTA
+     * @param sourceStartTokenIndex
+     * @param sourceEndTokenIndex
+     * @param offset
+     */
+    public static void copyViewFromTo(String origVuName, TextAnnotation ta, String newVuName, TextAnnotation newTA, int sourceStartTokenIndex, int sourceEndTokenIndex, int offset) {
+
+        if (origVuName.equals(newVuName) && ta == newTA)
+            throw new IllegalArgumentException("Source and destination TextAnnotations and views are the same.");
+
+        View vu = ta.getView(origVuName);
 
         if(vu == null) {
             // either the view is not contained, or the view contained is null
-            logger.warn("The view `" + vuName + "` for sentence `" + ta.text + "` is empty . . . ");
+            logger.warn("The view `" + origVuName + "` for sentence `" + ta.text + "` is empty . . . ");
             return;
         }
 
         View newVu = null;
-        if (newTA.hasView(vuName))
-            newVu = newTA.getView(vuName);
+        if (newTA.hasView(newVuName))
+            newVu = newTA.getView(newVuName);
         else {
             if (vu instanceof TokenLabelView) {
-                newVu = new TokenLabelView(vu.viewName, vu.viewGenerator, newTA, vu.score);
+                newVu = new TokenLabelView(newVuName, vu.viewGenerator, newTA, vu.score);
             } else if (vu instanceof SpanLabelView) {
-                newVu = new SpanLabelView(vu.viewName, vu.viewGenerator, newTA, vu.score);
+                newVu = new SpanLabelView(newVuName, vu.viewGenerator, newTA, vu.score);
             } else if (vu instanceof CoreferenceView) {
-                newVu = new CoreferenceView(vu.viewName, vu.viewGenerator, newTA, vu.score);
+                newVu = new CoreferenceView(newVuName, vu.viewGenerator, newTA, vu.score);
             } else if (vu instanceof PredicateArgumentView) {
-                newVu = new PredicateArgumentView(vu.viewName, vu.viewGenerator, newTA, vu.score);
+                newVu = new PredicateArgumentView(newVuName, vu.viewGenerator, newTA, vu.score);
             } else if (vu instanceof TreeView) {
-                newVu = new TreeView(vu.viewName, vu.viewGenerator, newTA, vu.score);
+                newVu = new TreeView(newVuName, vu.viewGenerator, newTA, vu.score);
             } else {
-                newVu = new View(vu.viewName, vu.viewGenerator, newTA, vu.score);
+                newVu = new View(newVuName, vu.viewGenerator, newTA, vu.score);
             }
         }
 
@@ -243,7 +271,7 @@ public class TextAnnotationUtilities {
 
         for (Constituent c : constituentsToCopy) {
             // replacing the constituents with a new ones, with token ids shifted
-            Constituent newC = copyConstituentWithNewTokenOffsets(newTA, c, offset);
+            Constituent newC = copyConstituentWithNewTokenOffsets(newTA, newVuName, c, offset);
             consMap.put(c, newC);
             newVu.addConstituent(newC);
         }
@@ -256,7 +284,7 @@ public class TextAnnotationUtilities {
             newVu.addRelation(newR);
         }
 
-        newTA.addView(vuName, newVu);
+        newTA.addView(newVuName, newVu);
 
         if (vu instanceof TreeView) {
             ((TreeView) newVu).makeTrees();
@@ -292,23 +320,36 @@ public class TextAnnotationUtilities {
 
     /**
      * create a new constituent with token offsets shifted by the specified amount
-     * @param newTA TextAnnotation which will contain the new Constituent
+     * @param newTa TextAnnotation which will contain the new Constituent
      * @param c original Constituent to copy
      * @param offset the offset to shift token indexes of new Constituent. Can be negative.
      * @return the new Constituent
      */
-    public static Constituent copyConstituentWithNewTokenOffsets(TextAnnotation newTA, Constituent c, int offset) {
+    public static Constituent copyConstituentWithNewTokenOffsets(TextAnnotation newTa, Constituent c, int offset) {
+        return copyConstituentWithNewTokenOffsets(newTa, c.viewName, c, offset);
+    }
+
+
+    /**
+     * create a new constituent with token offsets shifted by the specified amount
+     * @param newTa TextAnnotation which will contain the new Constituent
+     * @param newVuName view name for constituent to inhabit
+     * @param c original Constituent to copy
+     * @param offset the offset to shift token indexes of new Constituent. Can be negative.
+     * @return the new Constituent
+     */
+    public static Constituent copyConstituentWithNewTokenOffsets(TextAnnotation newTa, String newVuName, Constituent c, int offset) {
         int newStart = c.getStartSpan() + offset;
         int newEnd = c.getEndSpan() + offset;
 
-        assert(newStart >= 0 && newStart <= newTA.size());
-        assert(newEnd >= 0 && newEnd <= newTA.size());
+        assert(newStart >= 0 && newStart <= newTa.size());
+        assert(newEnd >= 0 && newEnd <= newTa.size());
 
         Constituent newCon = null;
         if (null != c.getLabelsToScores())
-            newCon = new Constituent(c.getLabelsToScores(), c.viewName, newTA, newStart, newEnd);
+            newCon = new Constituent(c.getLabelsToScores(), newVuName, newTa, newStart, newEnd);
         else
-            newCon = new Constituent(c.getLabel(), c.getConstituentScore(), c.viewName, newTA, newStart, newEnd);
+            newCon = new Constituent(c.getLabel(), c.getConstituentScore(), newVuName, newTa, newStart, newEnd);
 
         copyAttributesFromTo(c, newCon);
 

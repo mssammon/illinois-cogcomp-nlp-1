@@ -28,6 +28,7 @@ public class PredictionsAndEntitiesConfidenceScores {
 
     /*
      * This function assumes that the data is already tagged with the confidence scores
+     * (-- in GreedyDecoding, call to 'PredictionsToProbabilities')
      */
     public static void pruneLowConfidencePredictions(Data data, double minConfScore,
             NEWord.LabelToLookAt predictionsToLookAt) {
@@ -73,6 +74,8 @@ public class PredictionsAndEntitiesConfidenceScores {
 
     /*
      * Assumes BIO - annotated data
+     * Invoked in LearningCurveMultiDataset, but return value is ignored
+     * Appears to modify predictedEntity and goldEntity values in argument Data
      */
     public static Vector<NamedEntity> getAndMarkEntities(Data data,
             NEWord.LabelToLookAt predictionType) {
