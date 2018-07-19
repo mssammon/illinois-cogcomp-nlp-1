@@ -15,7 +15,10 @@
 
 DIST=target
 LIB=target/dependency
-mvn compile
+#mvn compile
+
+IS_YOURKIT=0
+
 # ensure the binary is built.
 if [ `ls $DIST/*jar | wc -l` -eq 0 ]; then
     mvn -DskipTests=true package
@@ -34,5 +37,12 @@ for JAR in `ls $LIB/*jar`; do
     cpath="$cpath:$JAR"
 done
 
-CMD="java -classpath  ${cpath} -Xms3g -Xmx10g -agentpath:/Applications/YourKit-Java-Profiler-2017.02.app/Contents/Resources/bin/mac/libyjpagent.jnilib edu.illinois.cs.cogcomp.ner.Main $1 $2"
+CMD="java -classpath  ${cpath} -Xms3g -Xmx10g edu.illinois.cs.cogcomp.ner.Main $1 $2"
+
+if [ ! $IS_YOURKIT eq 0 ]; then
+    CMD="java -classpath  ${cpath} -Xms3g -Xmx10g -agentpath:/Applications/YourKit-Java-Profiler-2017.02.app/Contents/Resources/bin/mac/libyjpagent.jnilib edu.illinois.cs.cogcomp.ner.Main $1 $2"
+fi
+
+echo "$0: running command '$CMD'..."
+
 $CMD

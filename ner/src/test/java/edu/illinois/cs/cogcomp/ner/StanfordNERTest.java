@@ -46,7 +46,7 @@ public class StanfordNERTest {
         // both the gold standard label, AND the prediction, which is handy.
         for (File file : files) {
             String fileContents = IOUtils.slurpFile(file.getAbsolutePath());
-            CoNLLColumnReaderAndWriter t = new CoNLLColumnReaderAndWriter();
+            CoNLLStanfordColumnReaderAndWriter t = new CoNLLStanfordColumnReaderAndWriter();
             SeqClassifierFlags flags = new SeqClassifierFlags();
             flags.deleteBlankLines = true;
             t.init(flags);

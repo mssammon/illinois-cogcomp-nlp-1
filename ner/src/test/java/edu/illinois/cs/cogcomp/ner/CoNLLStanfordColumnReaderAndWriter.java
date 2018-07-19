@@ -24,7 +24,7 @@ import edu.stanford.nlp.util.AbstractIterator;
  * classes that did most all this work, so I had to start from scratch.
  * @author redman
  */
-public class CoNLLColumnReaderAndWriter  implements DocumentReaderAndWriter<CoreLabel> {
+public class CoNLLStanfordColumnReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
     
     /** default. */
     private static final long serialVersionUID = 1L;

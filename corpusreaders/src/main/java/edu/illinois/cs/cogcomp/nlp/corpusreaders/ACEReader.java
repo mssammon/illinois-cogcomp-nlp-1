@@ -70,7 +70,18 @@ public class ACEReader extends AnnotationReader<TextAnnotation> {
     }
 
     /**
-     * Constructor for the ACE Data-set Reader
+     * Constructor for the ACE Data-set Reader.
+     * <b>IMPORTANT:</b> ACE directories in original 2005 distribution have several subdirectories in
+     *    each section, one of which -- "adj/" -- represents "adjudicated" (i.e. FINAL) annotations. Other
+     *    subdirectories have overlapping annotations, some in disagreement with adj/.
+     * This reader looks for subdirectories under sections and if "adj/" is found, only parses annotations from
+     *    that subdirectory.
+     *
+     * <b>WARNING:</b> The ACE files in 2005 specify a .dtd file that is found in the corpus root subdirectory
+     *    "dtds/".  However, the XML parser seems only to find this file <em>if it is in the same directory as
+     *    the annotation file</em>.  The half-baked solution is to add a symlink in every directory containing
+     *    annotation files. There must be a better way, but the XML parser class does not seem to allow dtd
+     *    to be explicitly specified.
      *
      * @param aceCorpusHome Path of the data. eg. `data/ace2004/data/English`
      * @param sections List of sections to parse. eg. `new String[] { "nw", "bn" }` Pass `null` to
@@ -104,6 +115,8 @@ public class ACEReader extends AnnotationReader<TextAnnotation> {
 
             String[] xmlFiles = IOUtils.lsFilesRecursive(sectionDir.getAbsolutePath(), apfFileFilter);
 
+            xmlFiles = filterXmlFiles(xmlFiles);
+
             if (xmlFiles.length == 0) {
                 logger.error("No valid xml file found. Skipping section " + section);
                 continue;
@@ -115,6 +128,29 @@ public class ACEReader extends AnnotationReader<TextAnnotation> {
         }
 
         this.fileList = Collections.unmodifiableList(fileNames);
+    }
+
+    /**
+     * given a list of files from a section, check whether any annotation files are under in an "adj/"
+     *    subdirectory; if so, <em>only</em> include files from this subdirectory ("adjudicated", meaning other
+     *    subdirs represent individual annotator outputs and therefore overlap/disagreements will result, so should
+     *    only keep the adjudicated annotation files). Otherwise, assume all files are relevant.
+     *
+     * @param xmlFiles
+     * @return
+     */
+    private String[] filterXmlFiles(String[] xmlFiles) {
+
+        List<String> adjFiles = new ArrayList<>();
+
+        for (String f : xmlFiles)
+            if (f.matches("\\/adj\\/"))
+                adjFiles.add(f);
+
+        if (adjFiles.isEmpty())
+            return xmlFiles;
+
+        return adjFiles.toArray(new String[adjFiles.size()]);
     }
 
     /**
